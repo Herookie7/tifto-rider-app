@@ -57,6 +57,23 @@ jobs:
         run: |
           npx expo prebuild --platform android --clean --no-install
 
+      - name: Configure Gradle Memory
+        run: |
+          # Create/update gradle.properties to increase heap size
+          # This prevents "Java heap space" errors during large builds
+          cat >> android/gradle.properties << EOF
+          # Increase JVM heap size for large React Native/Expo builds
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          # Enable Gradle daemon for faster builds
+          org.gradle.daemon=true
+          # Enable parallel builds
+          org.gradle.parallel=true
+          # Enable build cache
+          org.gradle.caching=true
+          # Configure Kotlin compiler
+          kotlin.daemon.jvmargs=-Xmx2g
+          EOF
+
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -76,10 +93,11 @@ jobs:
           cd android
           # Build APK - Sentry uploads are disabled via SENTRY_DISABLE_AUTO_UPLOAD
           # This prevents build failures if Sentry org/project doesn't match
-          # Using more workers and skipping tests/docs for faster builds
+          # Using optimized workers and skipping tests/docs for faster builds
+          # Reduced max-workers to 4 to balance memory usage with speed
           ./gradlew assembleRelease \
             --no-daemon \
-            --max-workers=6 \
+            --max-workers=4 \
             --parallel \
             --build-cache \
             -x test \
