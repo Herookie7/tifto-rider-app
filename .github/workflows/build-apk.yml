@@ -46,13 +46,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-expo-
 
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-          packager: npm
-          skip-install: false
+      - name: Install Expo CLI
+        run: npm install -g @expo/cli@latest
+
+      - name: Verify Expo
+        run: npx expo --version
 
       - name: Prebuild Android
         run: |
