@@ -22,7 +22,7 @@
       [
         "@sentry/react-native/expo",
         {
-          "organization": "ninjas-code",
+          "organization": "herookie07",
           "project": "tifto-rider-app",
           "url": "https://sentry.io/"
         }

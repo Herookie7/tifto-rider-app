@@ -78,14 +78,14 @@ jobs:
             --no-daemon \
             --max-workers=4 \
             --parallel \
-            --build-cache \
-            --configuration-cache
+            --build-cache
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN || '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' }}
-          SENTRY_ORG: ninjas-code
+          SENTRY_ORG: herookie07
           SENTRY_PROJECT: tifto-rider-app
+          SENTRY_DISABLE_AUTO_UPLOAD: false
 
       - name: Find and rename APK
         id: apk
