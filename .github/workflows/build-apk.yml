@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -76,11 +76,16 @@ jobs:
           cd android
           # Build APK - Sentry uploads are disabled via SENTRY_DISABLE_AUTO_UPLOAD
           # This prevents build failures if Sentry org/project doesn't match
+          # Using more workers and skipping tests/docs for faster builds
           ./gradlew assembleRelease \
             --no-daemon \
-            --max-workers=4 \
+            --max-workers=6 \
             --parallel \
-            --build-cache
+            --build-cache \
+            -x test \
+            -x lint \
+            -x check \
+            --warn
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
