@@ -45,22 +45,7 @@ const useLogin = () => {
   // API - Try riderLogin first, fallback to regular login if not available
   const [login] = useMutation(RIDER_LOGIN, {
     onCompleted: onLoginCompleted,
-    onError: (err) => {
-      // If riderLogin doesn't exist, try fallback
-      if (err?.graphQLErrors?.[0]?.message?.includes('Cannot query field "riderLogin"')) {
-        console.log('riderLogin not available, using fallback login mutation');
-        loginFallback({
-          variables: {
-            email: creds.username.toLowerCase(),
-            password: creds.password,
-            type: 'rider',
-            notificationToken: null,
-          },
-        });
-      } else {
-        onError(err);
-      }
-    },
+    onError,
   });
 
   const [loginFallback] = useMutation(RIDER_LOGIN_FALLBACK, {
