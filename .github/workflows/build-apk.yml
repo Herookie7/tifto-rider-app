@@ -74,15 +74,8 @@ jobs:
       - name: Build APK
         run: |
           cd android
-          # Skip all Sentry upload tasks to prevent build failures
-          # The APK will still be built successfully, just without source map upload
-          # Using pattern matching to exclude all Sentry upload tasks regardless of version
-          ./gradlew assembleRelease \
-            --no-daemon \
-            --max-workers=4 \
-            --parallel \
-            --build-cache \
-            -x :app:createBundleReleaseJsAndAssets_SentryUpload* || \
+          # Build APK - Sentry uploads are disabled via SENTRY_DISABLE_AUTO_UPLOAD
+          # This prevents build failures if Sentry org/project doesn't match
           ./gradlew assembleRelease \
             --no-daemon \
             --max-workers=4 \
@@ -91,7 +84,8 @@ jobs:
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
-          # Disable Sentry auto-upload to prevent failures
+          # Disable Sentry auto-upload to prevent build failures
+          # APK will be built successfully without source map upload
           SENTRY_DISABLE_AUTO_UPLOAD: true
           SENTRY_ORG: herookie07
           SENTRY_PROJECT: tifto-rider-app
