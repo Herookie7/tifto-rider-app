@@ -51,6 +51,7 @@ jobs:
 
       - name: Verify Expo
         run: npx expo --version
+        # Note: EXPO_TOKEN is optional - only needed for EAS Build, not for local builds
 
       - name: Prebuild Android
         run: |
