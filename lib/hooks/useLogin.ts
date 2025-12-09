@@ -13,6 +13,7 @@ import { AuthContext } from "../context/global/auth.context";
 import {
   DEFAULT_RIDER_CREDS,
   RIDER_LOGIN,
+  RIDER_LOGIN_FALLBACK,
 } from "../api/graphql/mutation/login";
 
 // Components
@@ -41,9 +42,34 @@ const useLogin = () => {
   // Context
   const { setTokenAsync } = useContext(AuthContext);
 
-  // API
+  // API - Try riderLogin first, fallback to regular login if not available
   const [login] = useMutation(RIDER_LOGIN, {
     onCompleted: onLoginCompleted,
+    onError: (err) => {
+      // If riderLogin doesn't exist, try fallback
+      if (err?.graphQLErrors?.[0]?.message?.includes('Cannot query field "riderLogin"')) {
+        console.log('riderLogin not available, using fallback login mutation');
+        loginFallback({
+          variables: {
+            email: creds.username.toLowerCase(),
+            password: creds.password,
+            type: 'rider',
+            notificationToken: null,
+          },
+        });
+      } else {
+        onError(err);
+      }
+    },
+  });
+
+  const [loginFallback] = useMutation(RIDER_LOGIN_FALLBACK, {
+    onCompleted: (data) => {
+      // Handle fallback login response (same structure as riderLogin)
+      if (data?.login) {
+        onLoginCompleted({ riderLogin: data.login });
+      }
+    },
     onError,
   });
 
@@ -90,19 +116,36 @@ function onDefaultCredsCompleted({ lastOrderCreds }: { lastOrderCreds: IRiderDef
       const notificationToken = await getNotificationToken();
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      await login({
-        variables: {
-          username: username.toLowerCase(),
-          password,
-          notificationToken,
-          timeZone,
-        },
-      });
+      // Try riderLogin first
+      try {
+        await login({
+          variables: {
+            username: username.toLowerCase(),
+            password,
+            notificationToken,
+            timeZone,
+          },
+        });
+      } catch (err: any) {
+        // If riderLogin mutation doesn't exist, use fallback
+        if (err?.graphQLErrors?.[0]?.message?.includes('Cannot query field "riderLogin"')) {
+          console.log('riderLogin mutation not available, using fallback');
+          await loginFallback({
+            variables: {
+              email: username.toLowerCase(),
+              password,
+              type: 'rider',
+              notificationToken,
+            },
+          });
+        } else {
+          throw err;
+        }
+      }
     } catch (err) {
       const error = err as ApolloError;
       console.log("Login error:", error);
       FlashMessageComponent({ message: error.message || "Login failed. Please try again." });
-    } finally {
       setIsLoading(false);
     }
   };
