@@ -74,18 +74,21 @@ jobs:
       - name: Build APK
         run: |
           cd android
+          # Skip Sentry upload task to prevent build failures if org/project mismatch
+          # The APK will still be built successfully, just without source map upload
           ./gradlew assembleRelease \
             --no-daemon \
             --max-workers=4 \
             --parallel \
-            --build-cache
+            --build-cache \
+            -x createBundleReleaseJsAndAssets_SentryUpload_com.tifto.rider@1.1.67+67_67
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN || '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' }}
+          # Sentry env vars - optional, uploads are skipped in CI
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN || '' }}
           SENTRY_ORG: herookie07
           SENTRY_PROJECT: tifto-rider-app
-          SENTRY_DISABLE_AUTO_UPLOAD: false
 
       - name: Find and rename APK
         id: apk
