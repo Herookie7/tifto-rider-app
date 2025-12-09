@@ -111,3 +111,4 @@ jobs:
           SIZE=$(du -h ${{ steps.apk.outputs.apk_path }} | cut -f1)
           echo "APK Size: $SIZE"
           echo "APK Name: ${{ steps.apk.outputs.apk_name }}"
+# Workflow updated Tuesday 09 December 2025 08:24:44 PM IST
