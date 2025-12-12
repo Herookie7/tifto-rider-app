@@ -18,36 +18,30 @@ const CustomDrawerHeader = () => {
   // Hook
   const { appTheme } = useApptheme();
   const { t } = useTranslation();
-  const { dataProfile, loadingProfile } = useUserContext();
+  const { dataProfile, loadingProfile, userId } = useUserContext();
   const [isRiderAvailable, setIsRiderAvailable] = useState(false);
 
   useEffect(() => {
-    setIsRiderAvailable(dataProfile?.available || false);
+    if (dataProfile?.available !== undefined) {
+      setIsRiderAvailable(dataProfile.available);
+    }
   }, [dataProfile?.available]);
 
   // Queries
   const [toggleAvailablity, { loading }] = useMutation(UPDATE_AVAILABILITY, {
     refetchQueries: [
-      { query: RIDER_PROFILE, variables: { id: dataProfile?._id?.toString() } },
+      { query: RIDER_PROFILE, variables: { id: dataProfile?._id?.toString() || userId || "" } },
     ],
     awaitRefetchQueries: true,
-    // onCompleted: () => {
-    // Don't manually update state - let the refetch handle it through useEffect
-    // The refetch will update dataProfile and trigger the useEffect to update isRiderAvailable
-    // showMessage({
-    //   message: t(!isRiderAvailable ? "You are now online" : "You are now offline"),
-    //   type: "success",
-    // });
-    // },
-    // onError: (error) => {
-    //   showMessage({
-    //     message:
-    //       error.graphQLErrors[0]?.message ||
-    //       error?.networkError?.message ||
-    //       t("Unable to update availability"),
-    //     type: "danger",
-    //   });
-    // },
+    onError: (error) => {
+      showMessage({
+        message:
+          error.graphQLErrors[0]?.message ||
+          error?.networkError?.message ||
+          t("Unable to update availability"),
+        type: "danger",
+      });
+    },
   }) as MutationTuple<IRiderProfile | undefined, { id: string }>;
 
   return (
@@ -100,8 +94,11 @@ const CustomDrawerHeader = () => {
             numberOfLines={2}
             ellipsizeMode="tail"
           >
-            {dataProfile?._id.substring(0, 9).toUpperCase() ?? "rider id"}{" "}
-            aklsdjaskldjaskldsjdaklsdjaskldjas
+            {dataProfile?._id
+              ? dataProfile._id.substring(0, 9).toUpperCase()
+              : userId
+                ? userId.substring(0, 9).toUpperCase()
+                : t("rider id")}
           </Text>
         </View>
       </View>
@@ -118,19 +115,20 @@ const CustomDrawerHeader = () => {
         ) : (
           <CustomSwitch
             value={isRiderAvailable}
-            isDisabled={loading}
+            isDisabled={loading || !dataProfile?._id || !userId}
             onToggle={async () => {
               try {
-                if (!dataProfile?._id?.toString()) {
+                const riderId = dataProfile?._id?.toString() || userId;
+                if (!riderId) {
                   showMessage({
-                    message: t("User ID is missing"),
+                    message: t("User ID is missing. Please wait for profile to load."),
                     type: "danger",
                   });
                   return;
                 }
 
                 await toggleAvailablity({
-                  variables: { id: dataProfile?._id?.toString() ?? "" },
+                  variables: { id: riderId },
                 });
               } catch (error) {
                 // Error is already handled in the mutation's onError callback

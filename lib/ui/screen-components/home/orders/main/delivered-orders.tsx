@@ -4,6 +4,7 @@ import { useApptheme } from "@/lib/context/global/theme.context";
 import UserContext from "@/lib/context/global/user.context";
 import Order from "@/lib/ui/useable-components/order";
 import { WalletIcon } from "@/lib/ui/useable-components/svg";
+import SpinnerComponent from "@/lib/ui/useable-components/spinner";
 import { NO_ORDER_PROMPT } from "@/lib/utils/constants";
 import { IOrderTabsComponentProps } from "@/lib/utils/interfaces";
 import { IOrder } from "@/lib/utils/interfaces/order.interface";
@@ -12,7 +13,7 @@ import { NetworkStatus } from "@apollo/client";
 import { FlashList } from "@shopify/flash-list";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { height } = Dimensions.get("window");
 
@@ -30,6 +31,7 @@ function HomeDeliveredOrdersMain(props: IOrderTabsComponentProps) {
     assignedOrders,
     refetchAssigned,
     networkStatusAssigned,
+    userId,
   } = useContext(UserContext);
 
   // States
@@ -64,6 +66,69 @@ function HomeDeliveredOrdersMain(props: IOrderTabsComponentProps) {
   // Calculate the marginBottom dynamically
   // const marginBottom = Platform.OS === "ios" ? height * 0.0 : height * 0.01;
   // Render
+  
+  // Show loading state
+  if (loadingAssigned && !assignedOrders) {
+    return (
+      <View
+        className="pt-14 flex-1 pb-16 items-center justify-center"
+        style={[style.contaienr, { backgroundColor: appTheme.screenBackground }]}
+      >
+        <SpinnerComponent />
+        <Text
+          className="mt-4 text-base"
+          style={{ color: appTheme.fontSecondColor }}
+        >
+          {t("Loading orders...")}
+        </Text>
+      </View>
+    );
+  }
+
+  // Show error state
+  if (errorAssigned && !assignedOrders) {
+    return (
+      <View
+        className="pt-14 flex-1 pb-16 items-center justify-center"
+        style={[style.contaienr, { backgroundColor: appTheme.screenBackground }]}
+      >
+        <WalletIcon height={100} width={100} color={appTheme.fontMainColor} />
+        <Text
+          className="mt-4 text-base text-center px-4"
+          style={{ color: appTheme.fontSecondColor }}
+        >
+          {t("Failed to load orders. Please try again.")}
+        </Text>
+        <TouchableOpacity onPress={refetchAssigned}>
+          <Text
+            className="mt-2 text-sm text-center px-4"
+            style={{ color: appTheme.primary }}
+          >
+            {t("Tap to retry")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Show message if userId is not available
+  if (!userId) {
+    return (
+      <View
+        className="pt-14 flex-1 pb-16 items-center justify-center"
+        style={[style.contaienr, { backgroundColor: appTheme.screenBackground }]}
+      >
+        <WalletIcon height={100} width={100} color={appTheme.fontMainColor} />
+        <Text
+          className="mt-4 text-base text-center px-4"
+          style={{ color: appTheme.fontSecondColor }}
+        >
+          {t("Please wait while we load your profile...")}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View
       className="pt-14 flex-1 pb-16"

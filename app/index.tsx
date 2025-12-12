@@ -21,22 +21,25 @@ import setupApollo from "@/lib/apollo";
 
 // Interfaces
 import { IOrder } from "@/lib/utils/interfaces/order.interface";
-import { useUserContext } from "@/lib/context/global/user.context";
 
 function App() {
   const client = setupApollo();
   const router = useRouter();
   const { locationPermission } = useLocationContext();
-  const { dataProfile } = useUserContext();
   // Handler
 
   const init = async () => {
-    const token = await AsyncStorage.getItem(RIDER_TOKEN);
-    if (token) {
-      router.replace(ROUTES.home as Href);
-      return;
+    try {
+      const token = await AsyncStorage.getItem(RIDER_TOKEN);
+      if (token) {
+        router.replace(ROUTES.home as Href);
+        return;
+      }
+      router.replace(ROUTES.login as Href);
+    } catch (error) {
+      console.error("Error in init:", error);
+      router.replace(ROUTES.login as Href);
     }
-    router.replace(ROUTES.login as Href);
   };
 
   // Notification Handler
@@ -116,7 +119,7 @@ function App() {
 
   useEffect(() => {
     init();
-  }, [locationPermission, router, dataProfile]);
+  }, [router]);
 
   // return <Redirect href="/(tabs)/home/orders" />;
   // return <Redirect href="/login" />;

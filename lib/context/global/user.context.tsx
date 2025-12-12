@@ -49,8 +49,9 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   const [riderOrderEarnings, setRiderOrderEarnings] = useState<
     IRiderEarningsArray[]
   >([] as IRiderEarningsArray[]);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const [zoneId, setZoneId] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Refs
   const locationListener = useRef<LocationSubscription>();
@@ -66,7 +67,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
     refetch: refetchProfile,
   } = useQuery(RIDER_PROFILE, {
     fetchPolicy: "cache-first",
-    skip: !userId,
+    skip: !userId || isInitializing,
     variables: {
       id: userId,
     },
@@ -86,14 +87,19 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
     fetchPolicy: "network-only",
     notifyOnNetworkStatusChange: true,
     pollInterval: 5000,
-    skip: !userId,
+    skip: !userId || isInitializing,
   });
 
   async function getUserId() {
-    const id = await AsyncStorage.getItem("rider-id");
-
-    if (id) {
-      setUserId(id);
+    try {
+      const id = await AsyncStorage.getItem("rider-id");
+      if (id) {
+        setUserId(id);
+      }
+    } catch (error) {
+      console.error("Error getting rider-id from AsyncStorage:", error);
+    } finally {
+      setIsInitializing(false);
     }
   }
 
@@ -132,7 +138,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
 
   // UseEffects
   useEffect(() => {
-    if (!dataProfile?.rider.zone._id || !dataProfile.rider._id) return;
+    if (!dataProfile?.rider?.zone?._id || !dataProfile?.rider?._id) return;
 
     const subscribeNewOrders = {
       unsubAssignOrder: subscribeToMore({
@@ -211,12 +217,23 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   }, [userId]);
 
   useEffect(() => {
+    // Set up listener first to catch any immediate updates
     const listener = asyncStorageEmitter.addListener("rider-id", (data) => {
-      setUserId(data?.value ?? "");
+      const newUserId = data?.value ?? null;
+      if (newUserId && newUserId !== userId) {
+        setUserId(newUserId);
+        setIsInitializing(false);
+      }
     });
 
+    // Load userId immediately
     getUserId();
-    trackRiderLocation();
+    
+    // Start location tracking only if userId is available
+    if (userId) {
+      trackRiderLocation();
+    }
+    
     return () => {
       if (locationListener.current) {
         locationListener?.current?.remove();
@@ -224,11 +241,18 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
 
       if (listener) {
         listener.removeListener("rider-id", () => {
-          console.log("Rider Id listerener removed");
+          console.log("Rider Id listener removed");
         });
       }
     };
   }, []);
+
+  // Start location tracking when userId becomes available
+  useEffect(() => {
+    if (userId && !locationListener.current) {
+      trackRiderLocation();
+    }
+  }, [userId]);
 
   return (
     <UserContext.Provider

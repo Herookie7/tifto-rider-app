@@ -62,15 +62,37 @@ const useLogin = () => {
 
   // Handlers
   // For login mutation
-async function onLoginCompleted({ riderLogin }: { riderLogin: IRiderLoginResponse }) {
-  setIsLoading(false);
-  if (riderLogin) {
-    console.log("riderLogin", riderLogin);
-    await setItem("rider-id", riderLogin.userId);
-    await setTokenAsync(riderLogin.token);
-    router.replace(ROUTES.home as Href);
-  } 
-}
+  async function onLoginCompleted({ riderLogin }: { riderLogin: IRiderLoginResponse }) {
+    if (!riderLogin) {
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      console.log("riderLogin", riderLogin);
+      
+      // Save rider-id first - this will emit the event that user context listens to
+      await setItem("rider-id", riderLogin.userId);
+      
+      // Set token - this clears the Apollo cache
+      await setTokenAsync(riderLogin.token);
+      
+      // Small delay to ensure user context has picked up the userId
+      // The asyncStorageEmitter emits synchronously, but we want to ensure
+      // the context has processed it before navigation
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      
+      // Navigate to home
+      router.replace(ROUTES.home as Href);
+    } catch (error) {
+      console.error("Error in onLoginCompleted:", error);
+      FlashMessageComponent({
+        message: t("Failed to complete login. Please try again."),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
 // For default credentials query
 function onDefaultCredsCompleted({ lastOrderCreds }: { lastOrderCreds: IRiderDefaultCredsResponse }) {
