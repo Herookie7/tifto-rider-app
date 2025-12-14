@@ -17,14 +17,17 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DefinitionNode, FragmentDefinitionNode } from "graphql";
 import { Subscription } from "zen-observable-ts";
-import useEnvVars from "../../environment";
 import { RIDER_TOKEN } from "../utils/constants";
 import { IRestaurantLocation } from "../utils/interfaces";
 import { calculateDistance } from "../utils/methods/custom-functions";
-// import { onError } from "apollo-link-error";
 
-const setupApollo = () => {
-  const { GRAPHQL_URL, WS_GRAPHQL_URL } = useEnvVars();
+interface EnvVars {
+  GRAPHQL_URL: string;
+  WS_GRAPHQL_URL: string;
+}
+
+const setupApollo = (envVars: EnvVars) => {
+  const { GRAPHQL_URL, WS_GRAPHQL_URL } = envVars;
 
   const cache = new InMemoryCache({
     typePolicies: {
@@ -99,7 +102,13 @@ const setupApollo = () => {
     uri: WS_GRAPHQL_URL,
     options: {
       reconnect: true,
-      timeout:30000
+      timeout: 30000,
+      connectionParams: async () => {
+        const token = await AsyncStorage.getItem(RIDER_TOKEN);
+        return {
+          authorization: token ? `Bearer ${token}` : "",
+        };
+      },
     },
   });
 

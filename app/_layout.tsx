@@ -11,6 +11,7 @@ import FlashMessage from "react-native-flash-message";
 // Service
 import setupApollo from "@/lib/apollo";
 import { initSentry } from "@/lib/utils/service";
+import getEnvVars from "@/environment";
 
 // Providers
 import { AuthProvider } from "@/lib/context/global/auth.context";
@@ -47,7 +48,10 @@ function RootLayout() {
     SpaceMono: require("../lib/assets/fonts/SpaceMono-Regular.ttf"),
     Inter: require("../lib/assets/fonts/Inter.ttf"),
   });
-  const client = setupApollo();
+  
+  // Get environment variables (using defaults - configuration context values are optional)
+  const envVars = getEnvVars();
+  const client = setupApollo(envVars);
 
   // Permissions
   async function grantCameraAndGalleryPermissions() {

@@ -1,36 +1,39 @@
 import { loadDevMessages, loadErrorMessages } from "@apollo/client/dev";
 import * as Updates from "expo-updates";
-import { useContext } from "react";
-import { ConfigurationContext } from "./lib/context/global/configuration.context";
-const getEnvVars = (env = Updates.channel) => {
-  const configuration = useContext(ConfigurationContext);
+import { IConfiguration } from "./lib/utils/interfaces";
+
+// Default environment values
+const DEFAULT_ENV_VARS = {
+  GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
+  WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
+  SENTRY_DSN:
+    "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
+  GOOGLE_MAPS_KEY: "",
+  ENVIRONMENT: __DEV__ ? "development" : "production",
+};
+
+// Pure function that accepts optional configuration
+const getEnvVars = (configuration?: IConfiguration) => {
   if (__DEV__) {
     loadDevMessages();
     loadErrorMessages();
   }
-  if (!__DEV__) {
-    return {
-      GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
-      WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
-      SENTRY_DSN:
-        configuration?.riderAppSentryUrl ??
-        "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
-      // GOOGLE_MAPS_KEY: 'AIzaSyBk4tvTtPaSEAVSvaao2yISz4m8Q-BeE1M',
-      GOOGLE_MAPS_KEY:configuration?.googleApiKey,
-      ENVIRONMENT: "production",
-    };
-  }
 
   return {
-      GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
-      WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
+    GRAPHQL_URL: DEFAULT_ENV_VARS.GRAPHQL_URL,
+    WS_GRAPHQL_URL: DEFAULT_ENV_VARS.WS_GRAPHQL_URL,
     SENTRY_DSN:
-      configuration?.riderAppSentryUrl ??
-      "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
-    // GOOGLE_MAPS_KEY: 'AIzaSyBk4tvTtPaSEAVSvaao2yISz4m8Q-BeE1M',
-    GOOGLE_MAPS_KEY:configuration?.googleApiKey,
-    ENVIRONMENT: "development",
+      configuration?.riderAppSentryUrl ?? DEFAULT_ENV_VARS.SENTRY_DSN,
+    GOOGLE_MAPS_KEY: configuration?.googleApiKey ?? DEFAULT_ENV_VARS.GOOGLE_MAPS_KEY,
+    ENVIRONMENT: DEFAULT_ENV_VARS.ENVIRONMENT,
   };
+};
+
+// Hook version for use in React components
+export const useEnvVars = () => {
+  // This will be used in components that have access to ConfigurationContext
+  // For now, return default values - components should use ConfigurationContext directly
+  return getEnvVars();
 };
 
 export default getEnvVars;

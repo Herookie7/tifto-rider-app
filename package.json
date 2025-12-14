@@ -8,11 +8,11 @@
     }
   },
   "scripts": {
-    "start": "expo start",
+    "start": "node node_modules/@expo/cli/build/bin/cli start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
+    "android": "node node_modules/@expo/cli/build/bin/cli run:android",
+    "ios": "node node_modules/@expo/cli/build/bin/cli run:ios",
+    "web": "node node_modules/@expo/cli/build/bin/cli start --web",
     "test": "jest --watchAll",
     "lint": "npx eslint && prettier --write .",
     "upload-sourcemaps": "SENTRY_AUTH_TOKEN=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 npx sentry-expo upload-sourcemaps"

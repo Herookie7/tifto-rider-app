@@ -21,6 +21,9 @@ import { useApptheme } from "@/lib/context/global/theme.context";
 import { ORDER_TYPE } from "@/lib/utils/types";
 import { FlashList } from "@shopify/flash-list";
 import { useTranslation } from "react-i18next";
+import { optimizeRoute, getRouteSummary, DeliveryLocation } from "@/lib/utils/routeOptimization";
+import { useOfflineQueue } from "@/lib/hooks/useOfflineQueue";
+import OfflineIndicator from "@/lib/ui/useable-components/offline-indicator";
 
 const { height } = Dimensions.get("window");
 
@@ -136,11 +139,40 @@ function HomeProcessingOrdersMain(props: IOrderTabsComponentProps) {
     );
   }
 
+  const routeSummary = optimizedRoute.length > 0 ? getRouteSummary(optimizedRoute) : null;
+
   return (
     <View
       className="pt-14 flex-1 pb-16"
       style={[style.contaienr, { backgroundColor: appTheme.screenBackground }]}
     >
+      <OfflineIndicator isOnline={isOnline} queuedActionsCount={queuedActions.length} />
+      {optimizedRoute.length > 1 && routeSummary && (
+        <View
+          style={{
+            padding: 12,
+            marginHorizontal: 16,
+            marginBottom: 12,
+            backgroundColor: appTheme.cardBackground || appTheme.screenBackground,
+            borderRadius: 8,
+            borderLeftWidth: 4,
+            borderLeftColor: '#007AFF'
+          }}
+        >
+          <Text style={{ color: appTheme.fontMainColor, fontWeight: 'bold', marginBottom: 4 }}>
+            {t("Optimized Route") || "Optimized Route"}
+          </Text>
+          <Text style={{ color: appTheme.fontSecondColor, fontSize: 12 }}>
+            {t("Total Distance") || "Total Distance"}: {routeSummary.totalDistance} km
+          </Text>
+          <Text style={{ color: appTheme.fontSecondColor, fontSize: 12 }}>
+            {t("Estimated Time") || "Estimated Time"}: ~{routeSummary.totalTime} min
+          </Text>
+          <Text style={{ color: appTheme.fontSecondColor, fontSize: 12, marginTop: 4 }}>
+            {optimizedRoute.length} {t("deliveries") || "deliveries"} in optimal order
+          </Text>
+        </View>
+      )}
       {orders?.length > 0 ? (
         <FlashList
           data={orders}
@@ -149,23 +181,45 @@ function HomeProcessingOrdersMain(props: IOrderTabsComponentProps) {
           showsVerticalScrollIndicator={false}
           refreshing={networkStatusAssigned === NetworkStatus.loading}
           onRefresh={refetchAssigned}
-          renderItem={({ item, index }: { item: IOrder; index: number }) => (
-            <Order
-              tab={route.key as ORDER_TYPE}
-              _id={item._id}
-              orderId={item.orderId}
-              orderStatus={item.orderStatus}
-              restaurant={item.restaurant}
-              deliveryAddress={item.deliveryAddress}
-              paymentMethod={item.paymentMethod}
-              orderAmount={item.orderAmount}
-              paymentStatus={item.paymentStatus}
-              acceptedAt={item.acceptedAt}
-              user={item.user}
-        
-              isLast={index === orders.length - 1}
-            />
-          )}
+          renderItem={({ item, index }: { item: IOrder; index: number }) => {
+            // Find this order in optimized route to show estimated time
+            const routeItem = optimizedRoute.find(r => r.orderId === item._id);
+            return (
+              <View>
+                {routeItem && optimizedRoute.length > 1 && (
+                  <View
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 8,
+                      backgroundColor: appTheme.cardBackground || appTheme.screenBackground,
+                      borderBottomWidth: 1,
+                      borderBottomColor: appTheme.borderColor || '#eee'
+                    }}
+                  >
+                    <Text style={{ color: appTheme.fontSecondColor, fontSize: 12 }}>
+                      {t("Stop") || "Stop"} {optimizedRoute.indexOf(routeItem) + 1} • 
+                      {t(" Est. Time") || " Est. Time"}: ~{routeItem.estimatedTime} min • 
+                      {t(" Distance") || " Distance"}: {Math.round(routeItem.distance * 10) / 10} km
+                    </Text>
+                  </View>
+                )}
+                <Order
+                  tab={route.key as ORDER_TYPE}
+                  _id={item._id}
+                  orderId={item.orderId}
+                  orderStatus={item.orderStatus}
+                  restaurant={item.restaurant}
+                  deliveryAddress={item.deliveryAddress}
+                  paymentMethod={item.paymentMethod}
+                  orderAmount={item.orderAmount}
+                  paymentStatus={item.paymentStatus}
+                  acceptedAt={item.acceptedAt}
+                  user={item.user}
+                  isLast={index === orders.length - 1}
+                />
+              </View>
+            );
+          }}
           ListEmptyComponent={() => {
             return (
               <View
