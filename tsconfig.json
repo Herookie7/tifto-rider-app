@@ -20,6 +20,5 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts",
     "lib/hooks/useLogin.js"
-  ],
-  "extends": "expo/tsconfig.base"
+  ]
 }

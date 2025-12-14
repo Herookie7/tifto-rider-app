@@ -715,10 +715,26 @@ export default function OrderDetailScreen() {
                       onPress={() =>
                         mutateAssignOrder({
                           variables: { id: localOrder?._id },
+                          onError: (error) => {
+                            const errorMessage = error.graphQLErrors?.[0]?.message || error.message || "";
+                            if (errorMessage.includes('no longer available') || 
+                                errorMessage.includes('already assigned') ||
+                                errorMessage.includes('assigned to another rider')) {
+                              // Show user-friendly message
+                              Alert.alert(
+                                t("Order Unavailable"),
+                                t("This order was already assigned to another rider. Please select a different order.")
+                              );
+                            } else {
+                              Alert.alert(
+                                t("Error"),
+                                errorMessage || t("Something went wrong. Please try again.")
+                              );
+                            }
+                          },
                           refetchQueries: [
                             {
                               query: RIDER_ORDERS,
-                              variables: { userId: userId },
                             },
                           ],
                         })
