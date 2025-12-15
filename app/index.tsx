@@ -18,12 +18,14 @@ import { RIDER_TOKEN, ROUTES } from "@/lib/utils/constants";
 
 // Service
 import setupApollo from "@/lib/apollo";
+import getEnvVars from "@/environment";
 
 // Interfaces
 import { IOrder } from "@/lib/utils/interfaces/order.interface";
 
 function App() {
-  const client = setupApollo();
+  const envVars = getEnvVars();
+  const client = setupApollo(envVars);
   const router = useRouter();
   const { locationPermission } = useLocationContext();
   // Handler
