@@ -28,11 +28,11 @@ import "@/i18next";
 import InternetProvider from "@/lib/context/global/internet-provider";
 import AppThemeProvidor from "@/lib/context/global/theme.context";
 import RootStackLayout from "@/lib/ui/layouts/root-layout";
-import { LocationPermissionComp } from "@/lib/ui/useable-components";
+import { LocationPermissionComp, ErrorBoundary } from "@/lib/ui/useable-components";
 import AnimatedSplashScreen from "@/lib/ui/useable-components/splash/AnimatedSplashScreen";
 import UnavailableStatus from "@/lib/ui/useable-components/unavailable-status";
 import { requestMediaLibraryPermissionsAsync } from "expo-image-picker";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import "../global.css";
 
@@ -50,8 +50,18 @@ function RootLayout() {
   });
   
   // Get environment variables (using defaults - configuration context values are optional)
-  const envVars = getEnvVars();
-  const client = setupApollo(envVars);
+  const envVars = useMemo(() => getEnvVars(), []);
+  
+  // Memoize Apollo client to prevent recreation on every render
+  const client = useMemo(() => {
+    try {
+      return setupApollo(envVars);
+    } catch (error) {
+      console.error("Failed to setup Apollo client:", error);
+      // Return a minimal client or handle error appropriately
+      throw error;
+    }
+  }, [envVars]);
 
   // Permissions
   async function grantCameraAndGalleryPermissions() {
@@ -76,30 +86,32 @@ function RootLayout() {
   }
 
   return (
-    <AnimatedSplashScreen>
-      <AppThemeProvidor>
-        <ApolloProvider client={client}>
-          <AuthProvider client={client}>
-            <UserProvider>
-              <InternetProvider>
-                <ConfigurationProvider>
-                  <LocationProvider>
-                    <SoundProvider>
-                      <LocationPermissionComp>
-                        <RootStackLayout />
-                        <UnavailableStatus />
-                      </LocationPermissionComp>
-                      <StatusBar style="inverted" />
-                      <FlashMessage position="bottom" />
-                    </SoundProvider>
-                  </LocationProvider>
-                </ConfigurationProvider>
-              </InternetProvider>
-            </UserProvider>
-          </AuthProvider>
-        </ApolloProvider>
-      </AppThemeProvidor>
-    </AnimatedSplashScreen>
+    <ErrorBoundary>
+      <AnimatedSplashScreen>
+        <AppThemeProvidor>
+          <ApolloProvider client={client}>
+            <AuthProvider client={client}>
+              <UserProvider>
+                <InternetProvider>
+                  <ConfigurationProvider>
+                    <LocationProvider>
+                      <SoundProvider>
+                        <LocationPermissionComp>
+                          <RootStackLayout />
+                          <UnavailableStatus />
+                        </LocationPermissionComp>
+                        <StatusBar style="inverted" />
+                        <FlashMessage position="bottom" />
+                      </SoundProvider>
+                    </LocationProvider>
+                  </ConfigurationProvider>
+                </InternetProvider>
+              </UserProvider>
+            </AuthProvider>
+          </ApolloProvider>
+        </AppThemeProvidor>
+      </AnimatedSplashScreen>
+    </ErrorBoundary>
   );
 }
 

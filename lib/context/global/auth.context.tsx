@@ -21,18 +21,27 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
 
   // State
   const [token, setToken] = useState<string>("");
+  
   const setTokenAsync = async (token: string) => {
-    await AsyncStorage.setItem(RIDER_TOKEN, token);
-    client.clearStore();
-    setToken(token);
+    try {
+      await AsyncStorage.setItem(RIDER_TOKEN, token);
+      await client.clearStore();
+      setToken(token);
+    } catch (error) {
+      console.error("Error setting token:", error);
+      // Still set token in state even if storage fails
+      setToken(token);
+    }
   };
 
   const logout = async () => {
     try {
       // Clear storage first to ensure logout happens immediately
-      await AsyncStorage.multiRemove([RIDER_TOKEN, "rider-id"]);
-
-      // Navigate to login immediately after clearing storage
+      try {
+        await AsyncStorage.multiRemove([RIDER_TOKEN, "rider-id"]);
+      } catch (storageError) {
+        console.error("Error clearing storage:", storageError);
+      }
 
       // Stop location updates if they were started
       try {
@@ -42,17 +51,34 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
           await Location.stopLocationUpdatesAsync("RIDER_LOCATION");
         }
       } catch (locationError) {
-        console.log("Error stopping location updates:", locationError);
+        console.error("Error stopping location updates:", locationError);
+      }
+
+      // Clear Apollo cache
+      try {
+        await client.clearStore();
+      } catch (apolloError) {
+        console.error("Error clearing Apollo store:", apolloError);
       }
 
       // Reset token state
       setToken("");
-      router.replace("/login");
+      
+      // Navigate to login
+      try {
+        router.replace("/login");
+      } catch (navError) {
+        console.error("Error navigating to login:", navError);
+      }
     } catch (e) {
-      // FlashMessageComponent({
-      //   message: `Logout failed - ${e?.message ?? "Unknown Error"}`,
-      // });
-      console.log("Logout Error: ", e);
+      console.error("Logout Error: ", e);
+      // Still try to navigate to login even if other operations fail
+      try {
+        setToken("");
+        router.replace("/login");
+      } catch (navError) {
+        console.error("Critical error during logout:", navError);
+      }
     }
   };
 

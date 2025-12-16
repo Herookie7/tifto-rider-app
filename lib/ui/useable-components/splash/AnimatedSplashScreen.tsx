@@ -18,8 +18,21 @@ export default function AnimatedSplashScreen({ children }:any) {
   const [isSplashVideoComplete, setSplashVideoComplete] = useState(false);
   const [isSplashAnimationComplete, setAnimationComplete] = useState(false);
 
+  // Timeout fallback to ensure app always loads (max 3 seconds after video should complete)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isSplashAnimationComplete) {
+        console.log("Splash screen timeout - forcing transition");
+        setAnimationComplete(true);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [isSplashAnimationComplete]);
+
   useEffect(() => {
     if (isAppReady && isSplashVideoComplete) {
+      console.log("Splash: Starting fade out animation");
       // Start fade out and scale down animation when the app is ready and video has completed
       opacityAnimation.value = withTiming(0, {
         duration: 300,
@@ -33,30 +46,49 @@ export default function AnimatedSplashScreen({ children }:any) {
           easing: Easing.out(Easing.exp),
         },
         () => {
+          console.log("Splash: Animation completed, showing app content");
           runOnJS(setAnimationComplete)(true); // Update the animation completion state
         },
       );
+    } else {
+      console.log("Splash: Waiting for app ready and video complete", { isAppReady, isSplashVideoComplete });
     }
   }, [isAppReady, isSplashVideoComplete]);
 
   const onImageLoaded = useCallback(async () => {
     try {
+      console.log("Splash: Video loaded, hiding splash screen");
       await SplashScreen.hideAsync();
       // Load stuff
       await Promise.all([]);
+      console.log("Splash: App resources loaded");
     } catch (e) {
-      console.log("Error hiding splash screen:", e);
-      // Handle errors
+      console.error("Splash: Error hiding splash screen:", e);
+      // Handle errors - still mark as ready
     } finally {
+      console.log("Splash: Marking app as ready");
       setAppReady(true);
     }
   }, []);
+
+  // Fallback: If video doesn't complete after 2 seconds of being ready, force completion
+  useEffect(() => {
+    if (isAppReady && !isSplashVideoComplete) {
+      const fallbackTimeout = setTimeout(() => {
+        console.log("Video completion fallback - marking video as complete");
+        setSplashVideoComplete(true);
+      }, 2000);
+
+      return () => clearTimeout(fallbackTimeout);
+    }
+  }, [isAppReady, isSplashVideoComplete]);
 
   const videoElement = useMemo(() => {
     return (
       <SplashVideo
         onLoaded={onImageLoaded}
         onFinish={() => {
+          console.log("Splash: Video finished playing");
           setSplashVideoComplete(true); // Mark video as complete
         }}
       />

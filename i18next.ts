@@ -75,37 +75,67 @@ export const languageResources: { [key: string]: { translation: object } } = {
 // Function to get stored language from AsyncStorage or fallback to device locale
 const getStoredLanguage = async (): Promise<void> => {
   try {
-    const storedLang = await AsyncStorage.getItem("tifto-language");
+    // Add timeout for AsyncStorage operation (max 2 seconds)
+    const storedLangPromise = AsyncStorage.getItem("tifto-language");
+    const timeoutPromise = new Promise<string | null>((resolve) =>
+      setTimeout(() => resolve(null), 2000)
+    );
+    
+    const storedLang = await Promise.race([storedLangPromise, timeoutPromise]);
     const deviceLang = Localization.getLocales()[0]?.languageCode || "en";
     const initialLang = storedLang || deviceLang;
 
-    await i18next.use(initReactI18next).init({
-      lng: initialLang,
-      fallbackLng: "en",
-      resources: languageResources,
-    });
-
-    // Apply the initial language
-    await i18next.changeLanguage(initialLang);
+    // Ensure i18next is initialized with fallback
+    if (!i18next.isInitialized) {
+      await i18next.use(initReactI18next).init({
+        lng: initialLang,
+        fallbackLng: "en",
+        resources: languageResources,
+        compatibilityJSON: "v3",
+        interpolation: {
+          escapeValue: false,
+        },
+      });
+    } else {
+      // If already initialized, just change language
+      await i18next.changeLanguage(initialLang);
+    }
   } catch (error) {
-    console.log("Error initializing language:", error);
+    console.error("Error initializing language:", error);
+    // Fallback initialization with English
+    try {
+      if (!i18next.isInitialized) {
+        await i18next.use(initReactI18next).init({
+          lng: "en",
+          fallbackLng: "en",
+          resources: languageResources,
+          compatibilityJSON: "v3",
+          interpolation: {
+            escapeValue: false,
+          },
+        });
+      }
+    } catch (fallbackError) {
+      console.error("Critical error initializing i18next:", fallbackError);
+    }
   }
 };
 
-// Initialize language
-getStoredLanguage();
-
-// Additional iOS-specific configuration (if necessary)
-if (Platform.OS === "ios") {
-  const iosLang = Localization.getLocales()[0]?.languageCode || "en";
-
-  i18next.use(initReactI18next).init({
-    lng: iosLang,
-    fallbackLng: "en",
-    resources: languageResources,
-  });
-
-  i18next.changeLanguage(iosLang);
-}
+// Initialize language with error handling
+getStoredLanguage().catch((error) => {
+  console.error("Failed to initialize i18next:", error);
+  // Ensure basic initialization even on failure
+  if (!i18next.isInitialized) {
+    i18next.use(initReactI18next).init({
+      lng: "en",
+      fallbackLng: "en",
+      resources: languageResources,
+      compatibilityJSON: "v3",
+      interpolation: {
+        escapeValue: false,
+      },
+    });
+  }
+});
 
 export default i18next;

@@ -3,12 +3,15 @@ import * as Notifications from "expo-notifications";
 import { Href, useRouter } from "expo-router";
 
 // Core
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Context
 import { useLocationContext } from "@/lib/context/global/location.context";
+import { useApptheme } from "@/lib/context/global/theme.context";
+import { useApolloClient } from "@apollo/client";
 
 // API
 import { RIDER_ORDERS } from "@/lib/apollo/queries";
@@ -16,31 +19,34 @@ import { RIDER_ORDERS } from "@/lib/apollo/queries";
 // Constant
 import { RIDER_TOKEN, ROUTES } from "@/lib/utils/constants";
 
-// Service
-import setupApollo from "@/lib/apollo";
-import getEnvVars from "@/environment";
-
 // Interfaces
 import { IOrder } from "@/lib/utils/interfaces/order.interface";
 
 function App() {
-  const envVars = getEnvVars();
-  const client = setupApollo(envVars);
   const router = useRouter();
+  const client = useApolloClient();
+  const { appTheme } = useApptheme();
   const { locationPermission } = useLocationContext();
-  // Handler
+  const [isInitializing, setIsInitializing] = useState(true);
 
+  // Handler
   const init = async () => {
     try {
+      setIsInitializing(true);
+      // Small delay to ensure router is ready
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      
       const token = await AsyncStorage.getItem(RIDER_TOKEN);
       if (token) {
         router.replace(ROUTES.home as Href);
-        return;
+      } else {
+        router.replace(ROUTES.login as Href);
       }
-      router.replace(ROUTES.login as Href);
     } catch (error) {
       console.error("Error in init:", error);
       router.replace(ROUTES.login as Href);
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -77,23 +83,27 @@ function App() {
         response.notification.request.content &&
         response.notification.request.content.data
       ) {
-        const { _id } = response.notification.request.content.data;
-        const { data } = await client.query({
-          query: RIDER_ORDERS,
-          fetchPolicy: "network-only",
-        });
-        const order = data.riderOrders.find((o: IOrder) => o._id === _id);
-        const lastNotificationHandledId = await AsyncStorage.getItem(
-          "@lastNotificationHandledId"
-        );
-        if (lastNotificationHandledId === _id) return;
-        await AsyncStorage.setItem("@lastNotificationHandledId", _id);
+        try {
+          const { _id } = response.notification.request.content.data;
+          const { data } = await client.query({
+            query: RIDER_ORDERS,
+            fetchPolicy: "network-only",
+          });
+          const order = data.riderOrders.find((o: IOrder) => o._id === _id);
+          const lastNotificationHandledId = await AsyncStorage.getItem(
+            "@lastNotificationHandledId"
+          );
+          if (lastNotificationHandledId === _id) return;
+          await AsyncStorage.setItem("@lastNotificationHandledId", _id);
 
-        router.navigate("/order-detail");
-        router.setParams({ itemId: _id, order });
+          router.navigate("/order-detail");
+          router.setParams({ itemId: _id, order });
+        } catch (error) {
+          console.error("Error handling notification:", error);
+        }
       }
     },
-    []
+    [client, router]
   );
 
   // Use Effect
@@ -121,11 +131,26 @@ function App() {
 
   useEffect(() => {
     init();
-  }, [router]);
+  }, []);
 
-  // return <Redirect href="/(tabs)/home/orders" />;
-  // return <Redirect href="/login" />;
-  return <></>;
+  // Show loading indicator while initializing
+  if (isInitializing) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: appTheme.themeBackground,
+        }}
+      >
+        <ActivityIndicator size="large" color={appTheme.primary} />
+      </View>
+    );
+  }
+
+  // Return null after navigation is complete
+  return null;
 }
 
 export default App;

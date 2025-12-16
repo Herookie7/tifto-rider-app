@@ -2,17 +2,30 @@ import { useApptheme } from "@/lib/context/global/theme.context";
 import { useUserContext } from "@/lib/context/global/user.context";
 import { Stack } from "expo-router";
 import SpinnerComponent from "../../useable-components/spinner";
+import { Colors } from "@/lib/utils/constants";
+import { useMemo } from "react";
 
 export default function RootStackLayout() {
-  // Hooks
-  const { appTheme } = useApptheme();
+  // Hooks with error handling
+  let appTheme;
+  try {
+    const themeContext = useApptheme();
+    appTheme = themeContext?.appTheme;
+  } catch (error) {
+    console.error("Error getting theme context:", error);
+  }
+
+  // Fallback to light theme if appTheme is not available
+  const safeAppTheme = useMemo(() => {
+    return appTheme || Colors.light;
+  }, [appTheme]);
 
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        headerTintColor: appTheme.mainTextColor,
-        headerTitleStyle: { color: appTheme.mainTextColor },
+        headerTintColor: safeAppTheme.mainTextColor,
+        headerTitleStyle: { color: safeAppTheme.mainTextColor },
       }}
       initialRouteName="(tabs)"
     >
@@ -23,7 +36,7 @@ export default function RootStackLayout() {
         name="order-detail"
         options={{
           // headerShown: false,
-          headerTintColor: appTheme.fontMainColor,
+          headerTintColor: safeAppTheme.fontMainColor,
         }}
       />
       <Stack.Screen name="chat" options={{ headerShown: false }} />

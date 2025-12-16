@@ -29,11 +29,20 @@ export const ConfigurationContext = React.createContext<
 export const ConfigurationProvider: React.FC<IConfigurationProviderProps> = ({
   children,
 }) => {
-  const [configuration, setConfiguration] = useState<
-    IConfiguration | undefined
-  >();
-  // API
+  // Default configuration fallback
+  const defaultConfiguration: IConfiguration = {
+    _id: "",
+    googleApiKey: "",
+    riderAppSentryUrl: "",
+    currency: "INR",
+    currencySymbol: "₹",
+  };
 
+  const [configuration, setConfiguration] = useState<IConfiguration>(
+    defaultConfiguration
+  );
+  
+  // API
   const { fetch, loading, error, data } = useLazyQueryQL(GET_CONFIGURATION, {
     debounceMs: 300,
   }) as ILazyQueryResult<
@@ -42,38 +51,48 @@ export const ConfigurationProvider: React.FC<IConfigurationProviderProps> = ({
   >;
 
   // Handlers
-  const onFetchConfiguration = () => {
+  const onFetchConfiguration = useCallback(() => {
     try {
-      const configuration: IConfiguration | undefined =
-        loading || error || !data
-          ? {
-              _id: "",
-              googleApiKey: "",
-              riderAppSentryUrl: "",
-              currency: "INR",
-              currencySymbol: "₹",
-            }
-          : data?.configuration;
+      if (loading) {
+        // Keep current configuration while loading
+        return;
+      }
 
-      setConfiguration(configuration);
+      if (error || !data) {
+        console.log("Configuration fetch error, using defaults:", error);
+        setConfiguration(defaultConfiguration);
+        return;
+      }
+
+      const fetchedConfig = data?.configuration;
+      if (fetchedConfig) {
+        setConfiguration(fetchedConfig);
+      } else {
+        setConfiguration(defaultConfiguration);
+      }
     } catch (error) {
-      console.log("Configuration error: ", error);
-      setConfiguration(undefined);
+      console.error("Configuration error: ", error);
+      setConfiguration(defaultConfiguration);
     }
-  };
+  }, [loading, error, data]);
 
   const fetchConfiguration = useCallback(() => {
-    fetch();
+    try {
+      fetch();
+    } catch (error) {
+      console.error("Error fetching configuration:", error);
+      setConfiguration(defaultConfiguration);
+    }
   }, [fetch]);
 
   // Use Effect
   useEffect(() => {
     fetchConfiguration();
-  }, []);
+  }, [fetchConfiguration]);
 
   useEffect(() => {
     onFetchConfiguration();
-  }, [data]);
+  }, [onFetchConfiguration]);
 
   return (
     <ConfigurationContext.Provider value={configuration}>

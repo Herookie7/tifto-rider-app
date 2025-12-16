@@ -92,7 +92,13 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
 
   async function getUserId() {
     try {
-      const id = await AsyncStorage.getItem("rider-id");
+      // Add timeout for AsyncStorage operation
+      const idPromise = AsyncStorage.getItem("rider-id");
+      const timeoutPromise = new Promise<string | null>((resolve) =>
+        setTimeout(() => resolve(null), 2000)
+      );
+      
+      const id = await Promise.race([idPromise, timeoutPromise]);
       if (id) {
         setUserId(id);
       }
@@ -104,117 +110,152 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   }
 
   const trackRiderLocation = async () => {
-    locationListener.current = await watchPositionAsync(
-      {
-        accuracy: LocationAccuracy.BestForNavigation,
-        timeInterval: 60000,
-        distanceInterval: 10,
-      },
-      async (location) => {
-        try {
-          const token = await AsyncStorage.getItem(RIDER_TOKEN);
-          if (!token) return;
-          if (
-            coordinatesRef.current?.coords?.latitude ===
-              location.coords?.latitude &&
-            coordinatesRef.current?.coords?.longitude ===
-              location.coords?.longitude
-          )
-            return;
-          coordinatesRef.current = location;
-          client.mutate({
-            mutation: UPDATE_LOCATION,
-            variables: {
-              latitude: location.coords.latitude.toString(),
-              longitude: location.coords.longitude.toString(),
-            },
-          });
-        } catch (error) {
-          console.log(error);
-        }
+    try {
+      // Check if already tracking
+      if (locationListener.current) {
+        return;
       }
-    );
+
+      locationListener.current = await watchPositionAsync(
+        {
+          accuracy: LocationAccuracy.BestForNavigation,
+          timeInterval: 60000,
+          distanceInterval: 10,
+        },
+        async (location) => {
+          try {
+            const token = await AsyncStorage.getItem(RIDER_TOKEN);
+            if (!token) return;
+            if (
+              coordinatesRef.current?.coords?.latitude ===
+                location.coords?.latitude &&
+              coordinatesRef.current?.coords?.longitude ===
+                location.coords?.longitude
+            )
+              return;
+            coordinatesRef.current = location;
+            await client.mutate({
+              mutation: UPDATE_LOCATION,
+              variables: {
+                latitude: location.coords.latitude.toString(),
+                longitude: location.coords.longitude.toString(),
+              },
+            });
+          } catch (error) {
+            console.error("Error updating location:", error);
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error starting location tracking:", error);
+    }
   };
 
   // UseEffects
   useEffect(() => {
     if (!dataProfile?.rider?.zone?._id || !dataProfile?.rider?._id) return;
 
-    const subscribeNewOrders = {
-      unsubAssignOrder: subscribeToMore({
-        document: SUBSCRIPTION_ASSIGNED_RIDER,
-        variables: { riderId: dataProfile?.rider?._id ?? userId },
-        updateQuery: (prev, { subscriptionData }) => {
-          if (!subscriptionData.data) return prev;
-          if (subscriptionData.data.subscriptionAssignRider.origin === "new") {
-            return {
-              riderOrders: [
-                subscriptionData.data.subscriptionAssignRider.order,
-                ...prev.riderOrders,
-              ],
-            };
-          } else if (
-            subscriptionData.data.subscriptionAssignRider.origin === "remove"
-          ) {
-            return {
-              riderOrders: [
-                ...prev.riderOrders.filter(
-                  (o: IOrder) =>
-                    o._id !==
-                    subscriptionData.data.subscriptionAssignRider.order._id
-                ),
-              ],
-            };
-          }
-          return prev;
-        },
-      }),
+    let unsubAssignOrder: (() => void) | undefined;
+    let unsubZoneOrder: (() => void) | undefined;
 
-      unsubZoneOrder: subscribeToMore({
-        document: SUBSCRIPTION_ZONE_ORDERS, // Previously known as SUBSCRIPTION_UNASSIGNED_ORDER
-        variables: { zoneId: dataProfile?.rider?.zone?._id ?? zoneId },
-        updateQuery: (prev, { subscriptionData }) => {
-          if (!subscriptionData.data) return prev;
-
-          if (subscriptionData.data.subscriptionZoneOrders.origin === "new") {
-            return {
-              riderOrders: [
-                subscriptionData.data.subscriptionZoneOrders.order,
-                ...prev.riderOrders,
-              ],
-            };
-          }
-          return prev;
-        },
-      }),
-    };
-
-    const { unsubZoneOrder, unsubAssignOrder } = subscribeNewOrders;
-    return () => {
+    try {
+      // Set zone ID
       if (dataProfile?.rider?.zone?._id) {
-        setZoneId(dataProfile?.rider?.zone?._id);
-        try {
-          unsubZoneOrder();
-        } catch (err) {
-          console.log("err in unsubZoneOrder", err);
-        }
+        setZoneId(dataProfile.rider.zone._id);
       }
 
-      if (unsubAssignOrder) {
-        try {
-          unsubAssignOrder();
-        } catch (err) {
-          console.log("err in unsubAssignOrder", err);
+      // Subscribe to assigned rider orders
+      try {
+        unsubAssignOrder = subscribeToMore({
+          document: SUBSCRIPTION_ASSIGNED_RIDER,
+          variables: { riderId: dataProfile?.rider?._id ?? userId },
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev;
+            if (subscriptionData.data.subscriptionAssignRider.origin === "new") {
+              return {
+                riderOrders: [
+                  subscriptionData.data.subscriptionAssignRider.order,
+                  ...prev.riderOrders,
+                ],
+              };
+            } else if (
+              subscriptionData.data.subscriptionAssignRider.origin === "remove"
+            ) {
+              return {
+                riderOrders: [
+                  ...prev.riderOrders.filter(
+                    (o: IOrder) =>
+                      o._id !==
+                      subscriptionData.data.subscriptionAssignRider.order._id
+                  ),
+                ],
+              };
+            }
+            return prev;
+          },
+          onError: (error) => {
+            console.error("Error in assigned rider subscription:", error);
+          },
+        });
+      } catch (assignError) {
+        console.error("Error setting up assigned rider subscription:", assignError);
+      }
+
+      // Subscribe to zone orders
+      try {
+        unsubZoneOrder = subscribeToMore({
+          document: SUBSCRIPTION_ZONE_ORDERS,
+          variables: { zoneId: dataProfile?.rider?.zone?._id ?? zoneId },
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev;
+
+            if (subscriptionData.data.subscriptionZoneOrders.origin === "new") {
+              return {
+                riderOrders: [
+                  subscriptionData.data.subscriptionZoneOrders.order,
+                  ...prev.riderOrders,
+                ],
+              };
+            }
+            return prev;
+          },
+          onError: (error) => {
+            console.error("Error in zone orders subscription:", error);
+          },
+        });
+      } catch (zoneError) {
+        console.error("Error setting up zone orders subscription:", zoneError);
+      }
+    } catch (error) {
+      console.error("Error setting up subscriptions:", error);
+    }
+
+    return () => {
+      try {
+        if (unsubZoneOrder) {
+          unsubZoneOrder();
         }
+      } catch (err) {
+        console.error("Error unsubscribing from zone orders:", err);
+      }
+
+      try {
+        if (unsubAssignOrder) {
+          unsubAssignOrder();
+        }
+      } catch (err) {
+        console.error("Error unsubscribing from assigned orders:", err);
       }
     };
-  }, [dataProfile]);
+  }, [dataProfile, userId, zoneId, subscribeToMore]);
 
   useEffect(() => {
     if (!userId) return;
 
-    refetchProfile({ id: userId });
-  }, [userId]);
+    refetchProfile({ id: userId }).catch((error) => {
+      console.error("Error refetching profile:", error);
+    });
+  }, [userId, refetchProfile]);
 
   useEffect(() => {
     // Set up listener first to catch any immediate updates
