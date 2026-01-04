@@ -133,7 +133,7 @@ jobs:
         with:
           name: tifto-rider-apk
           path: ${{ steps.apk.outputs.apk_path }}
-          retention-days: 30
+          retention-days: 3
           if-no-files-found: error
 
       - name: Get APK size

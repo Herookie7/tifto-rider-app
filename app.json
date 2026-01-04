@@ -5,12 +5,6 @@
     "version": "1.1.67",
     "slug": "food-delivery-rider-multivendor",
     "orientation": "portrait",
-    "splash": {
-      "image": "./lib/assets/images/black.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#000000"
-    },
-    "icon": "./lib/assets/images/icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -18,7 +12,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
-    "expo-router",
+      "expo-router",
       [
         "@sentry/react-native/expo",
         {
@@ -52,7 +46,6 @@
       "config": {
         "googleMapsApiKey": "AIzaSyCcm7_Wd7uvmC9YnYLu2JHGWPt6z1MaL1E"
       },
-      "icon": "./lib/assets/images/icon.png",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "$(PRODUCT_NAME) uses your location for features like finding orders nearby and tracking customer orders!",
         "UIBackgroundModes": [
@@ -75,12 +68,7 @@
           "apiKey": "AIzaSyCcm7_Wd7uvmC9YnYLu2JHGWPt6z1MaL1E"
         }
       },
-      "package": "com.tifto.rider",
-      "icon": "./lib/assets/images/appIcon.png",
-      "adaptiveIcon": {
-        "foregroundImage": "./lib/assets/images/appIcon.png",
-        "backgroundColor": "#ffffff"
-      }
+      "package": "com.tifto.rider"
     },
     "extra": {
       "eas": {

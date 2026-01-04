@@ -50,11 +50,29 @@ function RootLayout() {
   });
 
   // Get environment variables (using defaults - configuration context values are optional)
-  const envVars = useMemo(() => getEnvVars(), []);
+  const envVars = useMemo(() => {
+    const vars = getEnvVars();
+    if (!vars) {
+      console.warn("getEnvVars returned undefined. Using hardcoded fallback.");
+      return {
+        GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
+        WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
+        SENTRY_DSN: "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
+        GOOGLE_MAPS_KEY: "",
+        ENVIRONMENT: "production",
+      };
+    }
+    return vars;
+  }, []);
 
   // Memoize Apollo client to prevent recreation on every render
   const client = useMemo(() => {
     try {
+      if (!envVars) {
+        console.error("envVars is still undefined after check!");
+        // Should not happen with above fix
+        throw new Error("Environment variables are missing");
+      }
       return setupApollo(envVars);
     } catch (error) {
       console.error("Failed to setup Apollo client:", error);
