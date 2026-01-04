@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import SplashVideo from "./SplashVideo";
 
-export default function AnimatedSplashScreen({ children }:any) {
+export default function AnimatedSplashScreen({ children }: any) {
   const opacityAnimation = useSharedValue(1); // Shared value for opacity
   const scaleAnimation = useSharedValue(1); // Shared value for scale
   const [isAppReady, setAppReady] = useState(false);
@@ -23,12 +23,15 @@ export default function AnimatedSplashScreen({ children }:any) {
     const timeout = setTimeout(() => {
       if (!isSplashAnimationComplete) {
         console.log("Splash screen timeout - forcing transition");
+        SplashScreen.hideAsync().catch(() => { }); // Ensure native splash is hidden
         setAnimationComplete(true);
+        opacityAnimation.value = withTiming(0, { duration: 300 });
+        scaleAnimation.value = withTiming(2, { duration: 300 });
       }
     }, 3000);
 
     return () => clearTimeout(timeout);
-  }, [isSplashAnimationComplete]);
+  }, [isSplashAnimationComplete, opacityAnimation, scaleAnimation]);
 
   useEffect(() => {
     if (isAppReady && isSplashVideoComplete) {

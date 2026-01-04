@@ -21,9 +21,25 @@ export default function SplashVideo({ onLoaded, onFinish }: SplashVideoProps) {
   });
 
   useEffect(() => {
+    // Error handling
+    const errorSubscription = player.addListener('error', (error) => {
+      console.log('Splash video error:', error);
+      // Handle error as finish so app proceeds
+      if (!hasFinished) {
+        setHasFinished(true);
+        onFinish?.();
+      }
+    });
+
+    return () => {
+      errorSubscription.remove();
+    };
+  }, [player, hasFinished, onFinish]);
+
+  useEffect(() => {
     const subscription = player.addListener('statusChange', (status) => {
       console.log('Video status:', status); // Debug log
-      
+
       if (status.isLoaded && !hasLoaded) {
         setHasLoaded(true);
         onLoaded?.();
@@ -61,7 +77,7 @@ export default function SplashVideo({ onLoaded, onFinish }: SplashVideoProps) {
         setHasLoaded(true);
         onLoaded?.();
       }
-      
+
       // Check if video has finished playing
       if ((status.status === 'idle' || status.didJustFinish) && hasLoaded && !hasFinished) {
         console.log('Video ended via status change'); // Debug log

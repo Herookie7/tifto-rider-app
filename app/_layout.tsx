@@ -48,10 +48,10 @@ function RootLayout() {
     SpaceMono: require("../lib/assets/fonts/SpaceMono-Regular.ttf"),
     Inter: require("../lib/assets/fonts/Inter.ttf"),
   });
-  
+
   // Get environment variables (using defaults - configuration context values are optional)
   const envVars = useMemo(() => getEnvVars(), []);
-  
+
   // Memoize Apollo client to prevent recreation on every render
   const client = useMemo(() => {
     try {
@@ -71,7 +71,7 @@ function RootLayout() {
   // Use Effect
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      // SplashScreen.hideAsync(); // Handled by AnimatedSplashScreen
     }
   }, [loaded]);
   ErrorUtils.setGlobalHandler((error, isFatal) => {
