@@ -4,9 +4,10 @@ import { useUserContext } from "@/lib/context/global/user.context";
 import { app_theme } from "@/lib/utils/types/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { router } from "expo-router";
 
 // Core
-import { Text, View } from "react-native";
+import { Text, View, TouchableOpacity } from "react-native";
 import { Switch } from "react-native-switch";
 
 export default function OtherDetailsSection() {
@@ -107,6 +108,25 @@ export default function OtherDetailsSection() {
           />
         </View>
       </View>
+
+      {/* Holiday Request Button */}
+      <TouchableOpacity
+        className="flex flex-row items-center justify-between w-full p-4 rounded-md my-4"
+        style={{
+          backgroundColor: appTheme.themeBackground,
+          borderWidth: 1,
+          borderColor: appTheme.borderLineColor,
+        }}
+        onPress={() => router.push('/holiday-request')}
+      >
+        <View className="flex flex-row items-center gap-3">
+          <Ionicons name="calendar-outline" size={24} color={appTheme.primary} />
+          <Text style={{ color: appTheme.mainTextColor, fontSize: 16, fontWeight: '600' }}>
+            {t("Request Holiday/Leave")}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={24} color={appTheme.fontSecondColor} />
+      </TouchableOpacity>
     </View>
   );
 }

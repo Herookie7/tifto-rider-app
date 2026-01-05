@@ -15,10 +15,11 @@ export const ASSIGN_ORDER = gql`
 `;
 
 export const UPDATE_ORDER_STATUS_RIDER = gql`
-  mutation UpdateOrderStatusRider($id: String!, $status: String!) {
-    updateOrderStatusRider(id: $id, status: $status) {
+  mutation UpdateOrderStatusRider($id: String!, $status: String!, $reason: String) {
+    updateOrderStatusRider(id: $id, status: $status, reason: $reason) {
       _id
       orderStatus
+      reason
     }
   }
 `;

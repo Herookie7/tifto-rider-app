@@ -104,3 +104,24 @@ export const UPLOAD_IMAGE_TO_S3 = gql`
     }
   }
 `;
+
+export const CREATE_HOLIDAY_REQUEST = gql`
+  mutation CreateHolidayRequest(
+    $startDate: String!
+    $endDate: String!
+    $reason: String
+  ) {
+    createHolidayRequest(
+      startDate: $startDate
+      endDate: $endDate
+      reason: $reason
+    ) {
+      _id
+      startDate
+      endDate
+      reason
+      status
+      createdAt
+    }
+  }
+`;

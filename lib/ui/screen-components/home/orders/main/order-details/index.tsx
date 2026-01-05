@@ -47,11 +47,12 @@ import { ConfigurationContext } from "@/lib/context/global/configuration.context
 import { RIDER_ORDERS } from "@/lib/apollo/queries";
 import { useApptheme } from "@/lib/context/global/theme.context";
 import { useUserContext } from "@/lib/context/global/user.context";
-import { CustomContinueButton } from "@/lib/ui/useable-components";
+import { CustomContinueButton, FlashMessageComponent } from "@/lib/ui/useable-components";
 import AccordionItem from "@/lib/ui/useable-components/accordian";
 import SpinnerComponent from "@/lib/ui/useable-components/spinner";
 import { HomeIcon } from "@/lib/ui/useable-components/svg";
 import WelldoneComponent from "@/lib/ui/useable-components/well-done";
+import NotDeliveredModal from "@/lib/ui/useable-components/order/not-delivered-modal";
 import { CustomMapStyles } from "@/lib/utils/constants/map";
 import { map_styles } from "@/lib/utils/constants/order-details";
 import { IOrder } from "@/lib/utils/interfaces/order.interface";
@@ -97,6 +98,7 @@ export default function OrderDetailScreen() {
   } = useOrderDetail();
   const { userId } = useUserContext();
   const [localOrder, setLocalOrder] = useState<IOrder>({} as IOrder);
+  const [showNotDeliveredModal, setShowNotDeliveredModal] = useState(false);
   const { mutateAssignOrder, mutateOrderStatus, loadingOrderStatus } =
     useDetails(order);
 
@@ -679,31 +681,50 @@ export default function OrderDetailScreen() {
                 )}
 
               {tab == "processing" && localOrder.orderStatus === "PICKED" && (
-                <TouchableOpacity
-                  className="h-14 rounded-3xl py-3 w-full mt-4 mb-10"
-                  style={{ backgroundColor: appTheme.primary }}
-                  disabled={loadingOrderStatus}
-                  onPress={async () => {
-                    await mutateOrderStatus({
-                      variables: { id: localOrder?._id, status: "DELIVERED" },
-                      onCompleted: () => {
-                        setOrderId(localOrder?.orderId);
-                      },
-                    });
-                    setOrderId(localOrder?.orderId);
-                  }}
-                >
-                  {loadingOrderStatus ? (
-                    <SpinnerComponent color="white" />
-                  ) : (
+                <View className="flex flex-col gap-3 mt-4 mb-10">
+                  <TouchableOpacity
+                    className="h-14 rounded-3xl py-3 w-full"
+                    style={{ backgroundColor: appTheme.primary }}
+                    disabled={loadingOrderStatus}
+                    onPress={async () => {
+                      await mutateOrderStatus({
+                        variables: { id: localOrder?._id, status: "DELIVERED" },
+                        onCompleted: () => {
+                          setOrderId(localOrder?.orderId);
+                        },
+                      });
+                      setOrderId(localOrder?.orderId);
+                    }}
+                  >
+                    {loadingOrderStatus ? (
+                      <SpinnerComponent color="white" />
+                    ) : (
+                      <Text
+                        className="text-center text-lg font-medium"
+                        style={{ color: appTheme.black }}
+                      >
+                        {t("Mark as Delivered")}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="h-14 rounded-3xl py-3 w-full border-2"
+                    style={{ 
+                      borderColor: appTheme.primary,
+                      backgroundColor: "transparent"
+                    }}
+                    disabled={loadingOrderStatus}
+                    onPress={() => setShowNotDeliveredModal(true)}
+                  >
                     <Text
                       className="text-center text-lg font-medium"
-                      style={{ color: appTheme.black }}
+                      style={{ color: appTheme.primary }}
                     >
-                      {t("Mark as Delivered")}
+                      {t("Mark as Not Delivered")}
                     </Text>
-                  )}
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
               )}
 
               {tab === "new_orders" &&
@@ -753,6 +774,26 @@ export default function OrderDetailScreen() {
           status={localOrder?.orderStatus === "DELIVERED" ? "Delivered" : ""}
         />
       }
+      <NotDeliveredModal
+        isVisible={showNotDeliveredModal}
+        onClose={() => setShowNotDeliveredModal(false)}
+        onSubmit={async (reason, reasonType) => {
+          await mutateOrderStatus({
+            variables: { 
+              id: localOrder?._id, 
+              status: "CANCELLED",
+              reason: reason
+            },
+            onCompleted: () => {
+              setShowNotDeliveredModal(false);
+              FlashMessageComponent({
+                message: t("Order marked as not delivered"),
+              });
+            },
+          });
+        }}
+        loading={loadingOrderStatus}
+      />
     </>
   );
 }
