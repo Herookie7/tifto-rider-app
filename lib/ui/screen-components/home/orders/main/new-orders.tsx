@@ -20,6 +20,7 @@ import { useApptheme } from "@/lib/context/global/theme.context";
 import { WalletIcon } from "@/lib/ui/useable-components/svg";
 import { FlashList } from "@shopify/flash-list";
 import { useTranslation } from "react-i18next";
+import { GET_PENDING_DELIVERIES_FOR_ZONE, GET_RIDER_ASSIGNMENTS } from "@/lib/apollo/queries/subscription-delivery.query";
 
 const { height } = Dimensions.get("window");
 
@@ -133,13 +134,13 @@ export default function HomeNewOrdersMain(props: IOrderTabsComponentProps) {
   }
 
   // Tiffin Query: Available
-  const { data: tiffinData, loading: loadingTiffins, refetch: refetchTiffins } = useQuery(require("@/lib/apollo/queries/subscription-delivery.query").GET_PENDING_DELIVERIES_FOR_ZONE, {
+  const { data: tiffinData, loading: loadingTiffins, refetch: refetchTiffins } = useQuery(GET_PENDING_DELIVERIES_FOR_ZONE, {
     pollInterval: 10000,
     fetchPolicy: "network-only"
   });
 
   // Tiffin Query: Assignments
-  const { data: assignmentData, loading: loadingAssignments, refetch: refetchAssignments } = useQuery(require("@/lib/apollo/queries/subscription-delivery.query").GET_RIDER_ASSIGNMENTS, {
+  const { data: assignmentData, loading: loadingAssignments, refetch: refetchAssignments } = useQuery(GET_RIDER_ASSIGNMENTS, {
     pollInterval: 10000,
     fetchPolicy: "network-only"
   });

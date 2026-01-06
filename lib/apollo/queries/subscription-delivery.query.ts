@@ -34,7 +34,6 @@ export const GET_PENDING_DELIVERIES_FOR_ZONE = gql`
         }
     }
   }
-  }
 `;
 
 export const GET_RIDER_ASSIGNMENTS = gql`
