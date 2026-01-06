@@ -17,9 +17,14 @@ export const EDIT_RIDER = gql`
 `;
 
 export const UPDATE_LOCATION = gql`
-  mutation UpdateRiderLocation($latitude: String!, $longitude: String!) {
-    updateRiderLocation(latitude: $latitude, longitude: $longitude) {
+  mutation UpdateRiderLocation($lat: Float!, $lng: Float!) {
+    updateRiderLocation(lat: $lat, lng: $lng) {
       _id
+      riderProfile {
+          location {
+              coordinates
+          }
+      }
     }
   }
 `;
@@ -31,6 +36,41 @@ export const UPDATE_AVAILABILITY = gql`
     }
   }
 `;
+
+export const TOGGLE_RIDER_AVAILABILITY = gql`
+  mutation ToggleRiderAvailability {
+    toggleRiderAvailability {
+      _id
+      riderProfile {
+        available
+      }
+    }
+  }
+`;
+
+
+export const ASSIGN_SUBSCRIPTION_DELIVERY = gql`
+  mutation AssignSubscriptionDelivery($deliveryId: ID!) {
+    assignSubscriptionDelivery(deliveryId: $deliveryId) {
+      _id
+      status
+      rider {
+        _id
+      }
+    }
+  }
+`;
+
+export const UPDATE_SUBSCRIPTION_DELIVERY_STATUS = gql`
+  mutation UpdateSubscriptionDeliveryStatus($deliveryId: ID!, $status: String!, $reason: String) {
+    updateDeliveryStatus(deliveryId: $deliveryId, status: $status, reason: $reason) {
+      _id
+      status
+      deliveredAt
+    }
+  }
+`;
+
 
 export const UPDATE_LICENSE = gql`
   mutation UpdateRiderLicenseDetails(

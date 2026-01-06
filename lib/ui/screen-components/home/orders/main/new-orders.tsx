@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { NetworkStatus } from "@apollo/client";
+import { NetworkStatus, useQuery } from "@apollo/client";
 import { useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -132,94 +132,126 @@ export default function HomeNewOrdersMain(props: IOrderTabsComponentProps) {
     );
   }
 
+  // Tiffin Query: Available
+  const { data: tiffinData, loading: loadingTiffins, refetch: refetchTiffins } = useQuery(require("@/lib/apollo/queries/subscription-delivery.query").GET_PENDING_DELIVERIES_FOR_ZONE, {
+    pollInterval: 10000,
+    fetchPolicy: "network-only"
+  });
+
+  // Tiffin Query: Assignments
+  const { data: assignmentData, loading: loadingAssignments, refetch: refetchAssignments } = useQuery(require("@/lib/apollo/queries/subscription-delivery.query").GET_RIDER_ASSIGNMENTS, {
+    pollInterval: 10000,
+    fetchPolicy: "network-only"
+  });
+
+  const tiffinDeliveries = tiffinData?.getPendingDeliveriesForZone || [];
+  const myAssignments = assignmentData?.getRiderAssignments || [];
+
   return (
     <View
       className="pt-14 flex-1 pb-16"
       style={[style.contaienr, { backgroundColor: appTheme.screenBackground }]}
     >
-      {orders?.length > 0 ? (
-        <FlashList
-          data={orders}
-          estimatedItemSize={orders?.length}
-          keyExtractor={(item) => item._id}
-          showsVerticalScrollIndicator={false}
-          refreshing={networkStatusAssigned === NetworkStatus.loading}
-          onRefresh={refetchAssigned}
-          renderItem={({ item, index }: { item: IOrder; index: number }) => (
-            <Order
-              tab={route.key as ORDER_TYPE}
-              _id={item._id}
-              orderStatus={item.orderStatus}
-              restaurant={item.restaurant}
-              deliveryAddress={item.deliveryAddress}
-              paymentMethod={item.paymentMethod}
-              orderAmount={item.orderAmount}
-              paymentStatus={item.paymentStatus}
-              acceptedAt={item.acceptedAt}
-              orderId={item.orderId}
-              user={item.user}
-              key={item._id}
-              isLast={index === orders.length - 1}
-            />
-          )}
-          ListEmptyComponent={() => {
-            return (
-              <View
-                style={{
-                  minHeight:
-                    height > 670
-                      ? height - height * 0.5
-                      : height - height * 0.6,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <WalletIcon
-                  height={100}
-                  width={100}
-                  color={appTheme.fontMainColor}
-                />
-                {orders?.length === 0 ? (
-                  <Text
-                    className="font-[Inter] text-[18px] text-base font-[500]"
-                    style={{ color: appTheme.fontSecondColor }}
-                  >
-                    {t(NO_ORDER_PROMPT[route.key])}
-                  </Text>
-                ) : (
-                  <Text style={{ color: appTheme.fontSecondColor }}>
-                    {t("Pull down to refresh")}
-                  </Text>
-                )}
+      <FlashList
+        data={orders}
+        estimatedItemSize={orders?.length || 1}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        refreshing={networkStatusAssigned === NetworkStatus.loading || loadingTiffins || loadingAssignments}
+        onRefresh={() => {
+          refetchAssigned();
+          refetchTiffins();
+          refetchAssignments();
+        }}
+        ListHeaderComponent={() => (
+          <View>
+            {/* My Active Tasks */}
+            {myAssignments.length > 0 && (
+              <View className="mb-4">
+                <Text className="ml-4 my-2 text-lg font-bold" style={{ color: appTheme.fontMainColor }}>
+                  {t("My Active Deliveries")}
+                </Text>
+                {myAssignments.map((tiff: any) => (
+                  // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  <View key={tiff._id}>
+                    {require("@/lib/ui/useable-components/tiffin-card").default({ delivery: tiff })}
+                  </View>
+                ))}
+                <View className="h-0.5 bg-gray-200 my-2 mx-4" />
               </View>
-            );
-          }}
-        />
-      ) : (
-        <View
-          style={{
-            minHeight:
-              height > 670 ? height - height * 0.5 : height - height * 0.6,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <WalletIcon height={100} width={100} color={appTheme.fontMainColor} />
+            )}
 
-          {orders?.length === 0 ? (
-            <Text
-              className="font-[Inter] text-[18px] text-base font-[500]"
-              style={{ color: appTheme.fontSecondColor }}
+            {/* Available for Pickup */}
+            {tiffinDeliveries.length > 0 && (
+              <View className="mb-4">
+                <Text className="ml-4 my-2 text-lg font-bold" style={{ color: appTheme.fontMainColor }}>
+                  {t("Available Tiffins")}
+                </Text>
+                {tiffinDeliveries.map((tiff: any) => (
+                  // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  <View key={tiff._id}>
+                    {require("@/lib/ui/useable-components/tiffin-card").default({ delivery: tiff })}
+                  </View>
+                ))}
+                <View className="h-0.5 bg-gray-200 my-2 mx-4" />
+              </View>
+            )}
+            <Text className="ml-4 my-2 text-lg font-bold" style={{ color: appTheme.fontMainColor }}>
+              {t("Assigned Orders (Regular)")}
+            </Text>
+          </View>
+        )}
+        renderItem={({ item, index }: { item: IOrder; index: number }) => (
+          <Order
+            tab={route.key as ORDER_TYPE}
+            _id={item._id}
+            orderStatus={item.orderStatus}
+            restaurant={item.restaurant}
+            deliveryAddress={item.deliveryAddress}
+            paymentMethod={item.paymentMethod}
+            orderAmount={item.orderAmount}
+            paymentStatus={item.paymentStatus}
+            acceptedAt={item.acceptedAt}
+            orderId={item.orderId}
+            user={item.user}
+            key={item._id}
+            isLast={index === orders.length - 1}
+          />
+        )}
+        ListEmptyComponent={() => {
+          if (tiffinDeliveries.length > 0) return null; // Don't show empty if we have tiffins
+          return (
+            <View
+              style={{
+                minHeight:
+                  height > 670
+                    ? height - height * 0.5
+                    : height - height * 0.6,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              {t(NO_ORDER_PROMPT[route.key])}
-            </Text>
-          ) : (
-            <Text style={{ color: appTheme.fontSecondColor }}>
-              {t("Pull down to refresh")}
-            </Text>
-          )}
-        </View>
-      )}
+              <WalletIcon
+                height={100}
+                width={100}
+                color={appTheme.fontMainColor}
+              />
+              {orders?.length === 0 ? (
+                <Text
+                  className="font-[Inter] text-[18px] text-base font-[500]"
+                  style={{ color: appTheme.fontSecondColor }}
+                >
+                  {t(NO_ORDER_PROMPT[route.key])}
+                </Text>
+              ) : (
+                <Text style={{ color: appTheme.fontSecondColor }}>
+                  {t("Pull down to refresh")}
+                </Text>
+              )}
+            </View>
+          );
+        }}
+      />
     </View>
   );
 }

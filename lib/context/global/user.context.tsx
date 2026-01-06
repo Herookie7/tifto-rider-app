@@ -80,7 +80,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
     data: dataAssigned,
     networkStatus: networkStatusAssigned,
     subscribeToMore,
-   refetch: refetchAssigned
+    refetch: refetchAssigned
   } = useQuery(RIDER_ORDERS, {
     // onCompleted,
     // onError: error2,
@@ -97,7 +97,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
       const timeoutPromise = new Promise<string | null>((resolve) =>
         setTimeout(() => resolve(null), 2000)
       );
-      
+
       const id = await Promise.race([idPromise, timeoutPromise]);
       if (id) {
         setUserId(id);
@@ -128,17 +128,17 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
             if (!token) return;
             if (
               coordinatesRef.current?.coords?.latitude ===
-                location.coords?.latitude &&
+              location.coords?.latitude &&
               coordinatesRef.current?.coords?.longitude ===
-                location.coords?.longitude
+              location.coords?.longitude
             )
               return;
             coordinatesRef.current = location;
             await client.mutate({
               mutation: UPDATE_LOCATION,
               variables: {
-                latitude: location.coords.latitude.toString(),
-                longitude: location.coords.longitude.toString(),
+                lat: location.coords.latitude,
+                lng: location.coords.longitude,
               },
             });
           } catch (error) {
@@ -269,12 +269,12 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
 
     // Load userId immediately
     getUserId();
-    
+
     // Start location tracking only if userId is available
     if (userId) {
       trackRiderLocation();
     }
-    
+
     return () => {
       if (locationListener.current) {
         locationListener?.current?.remove();
