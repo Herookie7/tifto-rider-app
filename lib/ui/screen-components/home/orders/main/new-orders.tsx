@@ -28,6 +28,18 @@ export default function HomeNewOrdersMain(props: IOrderTabsComponentProps) {
   // Props
   const { route } = props;
 
+  // Tiffin Query: Available
+  const { data: tiffinData, loading: loadingTiffins, refetch: refetchTiffins } = useQuery(GET_PENDING_DELIVERIES_FOR_ZONE, {
+    pollInterval: 10000,
+    fetchPolicy: "network-only"
+  });
+
+  // Tiffin Query: Assignments
+  const { data: assignmentData, loading: loadingAssignments, refetch: refetchAssignments } = useQuery(GET_RIDER_ASSIGNMENTS, {
+    pollInterval: 10000,
+    fetchPolicy: "network-only"
+  });
+
   // Hooks
   const { appTheme } = useApptheme();
   const { t } = useTranslation();
@@ -133,17 +145,7 @@ export default function HomeNewOrdersMain(props: IOrderTabsComponentProps) {
     );
   }
 
-  // Tiffin Query: Available
-  const { data: tiffinData, loading: loadingTiffins, refetch: refetchTiffins } = useQuery(GET_PENDING_DELIVERIES_FOR_ZONE, {
-    pollInterval: 10000,
-    fetchPolicy: "network-only"
-  });
 
-  // Tiffin Query: Assignments
-  const { data: assignmentData, loading: loadingAssignments, refetch: refetchAssignments } = useQuery(GET_RIDER_ASSIGNMENTS, {
-    pollInterval: 10000,
-    fetchPolicy: "network-only"
-  });
 
   const tiffinDeliveries = tiffinData?.getPendingDeliveriesForZone || [];
   const myAssignments = assignmentData?.getRiderAssignments || [];
