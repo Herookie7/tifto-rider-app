@@ -24,7 +24,10 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // GraphQL
-import { CREATE_WITHDRAW_REQUEST } from "@/lib/apollo/mutations/withdraw-request.mutation";
+import {
+  CREATE_WITHDRAW_REQUEST,
+  CANCEL_WITHDRAW_REQUEST,
+} from "@/lib/apollo/mutations/withdraw-request.mutation";
 import {
   RIDER_BY_ID,
   RIDER_CURRENT_WITHDRAW_REQUEST,
@@ -143,6 +146,27 @@ export default function WalletMain() {
       ],
     });
 
+  const [cancelWithdrawRequest, { loading: cancelWithdrawRequestLoading }] =
+    useMutation(CANCEL_WITHDRAW_REQUEST, {
+      onCompleted: () => {
+        FlashMessageComponent({
+          message: t("Withdraw request cancelled successfully"),
+        });
+        // Refetch queries
+        fetchRiderCurrentWithdrawRequest({ riderId: userId });
+        fetchRiderProfile();
+      },
+      onError: (error) => {
+        FlashMessageComponent({
+          message:
+            error.message ||
+            error.graphQLErrors[0].message ||
+            JSON.stringify(error) ||
+            t("Something went wrong"),
+        });
+      },
+    });
+
   // Handlers
   async function handleFormSubmission(withdrawAmount: number) {
     const currentAmount = riderProfileData?.rider.currentWalletAmount || 0;
@@ -256,6 +280,48 @@ export default function WalletMain() {
               }
               isLast={false}
             />
+            <View className="px-5 pb-4">
+              <CustomContinueButton
+                title={
+                  cancelWithdrawRequestLoading
+                    ? t("Cancelling...")
+                    : t("Cancel Request")
+                }
+                onPress={() => {
+                  Alert.alert(
+                    t("Cancel Request"),
+                    t("Are you sure you want to cancel this withdraw request?"),
+                    [
+                      {
+                        text: t("No"),
+                        style: "cancel",
+                      },
+                      {
+                        text: t("Yes"),
+                        onPress: () => {
+                          createWithDrawRequestLoading
+                            ? null
+                            : cancelWithdrawRequest({
+                              variables: {
+                                id: riderCurrentWithdrawRequestData
+                                  ?.riderCurrentWithdrawRequest._id,
+                              },
+                            });
+                        },
+                      },
+                    ],
+                  );
+                }}
+                disabled={cancelWithdrawRequestLoading}
+                style={{
+                  backgroundColor: "transparent",
+                  borderWidth: 1,
+                  borderColor: appTheme.primary,
+                  marginTop: 10,
+                }}
+                textStyle={{ color: appTheme.primary }}
+              />
+            </View>
           </View>
         )}
       <Text

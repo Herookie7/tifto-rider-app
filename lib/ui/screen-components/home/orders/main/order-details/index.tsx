@@ -656,14 +656,14 @@ export default function OrderDetailScreen() {
 
               {/* Pick up Button */}
               {tab === "processing" &&
-                localOrder.orderStatus === "ASSIGNED" && (
+                localOrder.orderStatus === "assigned" && (
                   <TouchableOpacity
                     className="h-14 rounded-3xl py-3 w-full mt-4 mb-10"
                     style={{ backgroundColor: appTheme.primary }}
                     disabled={loadingOrderStatus}
                     onPress={() =>
                       mutateOrderStatus({
-                        variables: { id: localOrder?._id, status: "PICKED" },
+                        variables: { id: localOrder?._id, status: "picked" },
                       })
                     }
                   >
@@ -680,7 +680,7 @@ export default function OrderDetailScreen() {
                   </TouchableOpacity>
                 )}
 
-              {tab == "processing" && localOrder.orderStatus === "PICKED" && (
+              {tab == "processing" && localOrder.orderStatus === "picked" && (
                 <View className="flex flex-col gap-3 mt-4 mb-10">
                   <TouchableOpacity
                     className="h-14 rounded-3xl py-3 w-full"
@@ -688,7 +688,7 @@ export default function OrderDetailScreen() {
                     disabled={loadingOrderStatus}
                     onPress={async () => {
                       await mutateOrderStatus({
-                        variables: { id: localOrder?._id, status: "DELIVERED" },
+                        variables: { id: localOrder?._id, status: "delivered" },
                         onCompleted: () => {
                           setOrderId(localOrder?.orderId);
                         },
@@ -710,7 +710,7 @@ export default function OrderDetailScreen() {
 
                   <TouchableOpacity
                     className="h-14 rounded-3xl py-3 w-full border-2"
-                    style={{ 
+                    style={{
                       borderColor: appTheme.primary,
                       backgroundColor: "transparent"
                     }}
@@ -728,7 +728,7 @@ export default function OrderDetailScreen() {
               )}
 
               {tab === "new_orders" &&
-                localOrder.orderStatus === "ACCEPTED" && (
+                localOrder.orderStatus === "accepted" && (
                   <View style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom : insets.bottom + 10 }}>
                     <CustomContinueButton
                       title={t("Assign me")}
@@ -738,9 +738,9 @@ export default function OrderDetailScreen() {
                           variables: { id: localOrder?._id },
                           onError: (error) => {
                             const errorMessage = error.graphQLErrors?.[0]?.message || error.message || "";
-                            if (errorMessage.includes('no longer available') || 
-                                errorMessage.includes('already assigned') ||
-                                errorMessage.includes('assigned to another rider')) {
+                            if (errorMessage.includes('no longer available') ||
+                              errorMessage.includes('already assigned') ||
+                              errorMessage.includes('assigned to another rider')) {
                               // Show user-friendly message
                               Alert.alert(
                                 t("Order Unavailable"),
@@ -771,7 +771,7 @@ export default function OrderDetailScreen() {
         <WelldoneComponent
           orderId={orderId}
           setOrderId={setOrderId}
-          status={localOrder?.orderStatus === "DELIVERED" ? "Delivered" : ""}
+          status={localOrder?.orderStatus === "delivered" ? "Delivered" : ""}
         />
       }
       <NotDeliveredModal
@@ -779,9 +779,9 @@ export default function OrderDetailScreen() {
         onClose={() => setShowNotDeliveredModal(false)}
         onSubmit={async (reason, reasonType) => {
           await mutateOrderStatus({
-            variables: { 
-              id: localOrder?._id, 
-              status: "CANCELLED",
+            variables: {
+              id: localOrder?._id,
+              status: "not_delivered",
               reason: reason
             },
             onCompleted: () => {

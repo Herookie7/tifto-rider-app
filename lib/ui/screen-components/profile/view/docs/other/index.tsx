@@ -10,7 +10,15 @@ import { router } from "expo-router";
 import { Text, View, TouchableOpacity } from "react-native";
 import { Switch } from "react-native-switch";
 
-export default function OtherDetailsSection() {
+// Types
+import { TRiderProfileBottomBarBit } from "@/lib/utils/types/rider";
+import { Dispatch, SetStateAction } from "react";
+
+export default function OtherDetailsSection({
+  setIsFormOpened,
+}: {
+  setIsFormOpened: Dispatch<SetStateAction<TRiderProfileBottomBarBit>>;
+}) {
   // Hooks
   const { t } = useTranslation();
   const { dataProfile } = useUserContext();
@@ -25,6 +33,11 @@ export default function OtherDetailsSection() {
         >
           {t("Other information")}
         </Text>
+        <TouchableOpacity onPress={() => setIsFormOpened("PROFILE_FORM")}>
+          <Text className="font-semibold text-[#0EA5E9]">
+            {t("Edit")}
+          </Text>
+        </TouchableOpacity>
       </View>
       <View
         className="flex flex-col gap-3 item-start justify-between w-full   h-20 p-4 rounded-md my-4"
@@ -52,7 +65,7 @@ export default function OtherDetailsSection() {
         <Text style={{ color: appTheme.fontSecondColor }}>{t("Password")}</Text>
         <View className="flex-1 h-12 text-base text-black">
           <Text className="h-12" style={{ color: appTheme.fontSecondColor }}>
-            {dataProfile?.password ?? "Password@123"}
+            ********
           </Text>
         </View>
       </View>

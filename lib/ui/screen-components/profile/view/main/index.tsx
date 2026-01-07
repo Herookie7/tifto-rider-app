@@ -3,10 +3,12 @@ import { IRiderProfileMainProps } from "@/lib/utils/interfaces/rider-profile.int
 import { View } from "react-native";
 import DocumentsSection from "../docs/documents";
 import OtherDetailsSection from "../docs/other";
+import UpdateProfileForm from "../../forms/update-profile";
 
 export default function ProfileMain({
   setIsFormOpened,
-}: IRiderProfileMainProps) {
+  isFormOpened,
+}: IRiderProfileMainProps & { isFormOpened: TRiderProfileBottomBarBit }) {
   // Hooks
   const { appTheme } = useApptheme();
   return (
@@ -15,7 +17,10 @@ export default function ProfileMain({
       style={{ backgroundColor: appTheme.screenBackground }}
     >
       <DocumentsSection setIsFormOpened={setIsFormOpened} />
-      <OtherDetailsSection />
+      <OtherDetailsSection setIsFormOpened={setIsFormOpened} />
+      {isFormOpened === "PROFILE_FORM" && (
+        <UpdateProfileForm setIsFormOpened={setIsFormOpened} />
+      )}
     </View>
   );
 }

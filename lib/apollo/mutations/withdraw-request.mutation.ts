@@ -10,3 +10,12 @@ export const CREATE_WITHDRAW_REQUEST = gql`
     }
   }
 `;
+
+export const CANCEL_WITHDRAW_REQUEST = gql`
+  mutation CancelRiderWithdrawRequest($id: ID!) {
+  cancelRiderWithdrawRequest(id: $id) {
+    _id
+    status
+  }
+}
+`;
