@@ -261,7 +261,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
     // Set up listener first to catch any immediate updates
     const listener = asyncStorageEmitter.addListener("rider-id", (data) => {
       const newUserId = data?.value ?? null;
-      if (newUserId && newUserId !== userId) {
+      if (newUserId !== userId) {
         setUserId(newUserId);
         setIsInitializing(false);
       }

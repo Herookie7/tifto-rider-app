@@ -30,6 +30,7 @@ export const Colors = {
   light: {
     // Primary colors
     primary: Palette.light.primary,
+    text: Palette.light.text,
     primaryBlue: "#0EA5E9",
     main: Palette.light.primary,
 
@@ -208,6 +209,7 @@ export const Colors = {
   dark: {
     // Primary colors
     primary: Palette.dark.primary,
+    text: Palette.dark.text,
     primaryBlue: "#0EA5E9",
     main: Palette.dark.primary,
 

@@ -97,12 +97,12 @@ export const RIDER_PROFILE = gql`
       isActive
       licenseDetails {
         expiryDate
-        image
-        number
+        licenseImage
+        licenseNumber
       }
       vehicleDetails {
-        image
-        number
+        vehicleImage
+        vehicleNumber
       }
       timeZone
       workSchedule {

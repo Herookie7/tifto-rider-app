@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { RIDER_TOKEN } from "@/lib/utils/constants";
 import { IAuthContext, IAuthProviderProps } from "@/lib/utils/interfaces";
 import { useRouter } from "expo-router";
+import { removeItem } from "@/lib/services/async-storage";
 
 export const AuthContext = React.createContext<IAuthContext>(
   {} as IAuthContext
@@ -21,7 +22,7 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
 
   // State
   const [token, setToken] = useState<string>("");
-  
+
   const setTokenAsync = async (token: string) => {
     try {
       await AsyncStorage.setItem(RIDER_TOKEN, token);
@@ -38,7 +39,8 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
     try {
       // Clear storage first to ensure logout happens immediately
       try {
-        await AsyncStorage.multiRemove([RIDER_TOKEN, "rider-id"]);
+        await removeItem(RIDER_TOKEN);
+        await removeItem("rider-id");
       } catch (storageError) {
         console.error("Error clearing storage:", storageError);
       }
@@ -63,7 +65,7 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
 
       // Reset token state
       setToken("");
-      
+
       // Navigate to login
       try {
         router.replace("/login");

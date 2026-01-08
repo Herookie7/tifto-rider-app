@@ -131,6 +131,31 @@ export default function HolidayRequestScreen() {
                     {loading ? 'Submitting...' : 'Submit Request'}
                 </Text>
             </TouchableOpacity>
+
+            <View style={[styles.formGroup, { marginTop: 30 }]}>
+                <Text style={[styles.title, { fontSize: 20, marginBottom: 15, color: colors.text }]}>
+                    My Requests
+                </Text>
+
+                {/* TODO: Integrate with backend when riderHolidayRequests query is available */}
+                <View style={[styles.dateButton, { backgroundColor: colors.card, alignItems: 'flex-start', marginBottom: 10 }]}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 5 }}>
+                        <Text style={{ fontSize: 14, color: colors.textSecondary }}>{formatDate(new Date())}</Text>
+                        <View style={{ backgroundColor: '#FFF3E0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
+                            <Text style={{ color: '#FF9800', fontSize: 12, fontWeight: 'bold' }}>Pending</Text>
+                        </View>
+                    </View>
+                    <Text style={{ color: colors.text, fontSize: 16, fontWeight: '500' }}>
+                        Medical Leave
+                    </Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4 }}>
+                        {formatDate(new Date())} - {formatDate(new Date(Date.now() + 86400000))}
+                    </Text>
+                </View>
+                <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 10, fontStyle: 'italic' }}>
+                    (List functionality waiting for backend update)
+                </Text>
+            </View>
         </ScrollView>
     );
 }
