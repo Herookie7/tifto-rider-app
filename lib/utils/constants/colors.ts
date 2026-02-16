@@ -196,7 +196,7 @@ export const Colors = {
 
     // Tab navigator
     tabNaviatorBackground: "#1F2937",
-    lowOpacityPrimaryColor: "rgba(144, 227, 109, 0.15)",
+    lowOpacityPrimaryColor: "rgba(255, 152, 0, 0.12)",
     switchButtonColor: "#4F46E5",
     sidebarIconBackground: "#E5E7EB",
 

@@ -6,8 +6,6 @@ import { IConfiguration } from "./lib/utils/interfaces";
 const DEFAULT_ENV_VARS = {
   GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
   WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
-  SENTRY_DSN:
-    "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
   GOOGLE_MAPS_KEY: "",
   ENVIRONMENT: __DEV__ ? "development" : "production",
 };
@@ -22,8 +20,6 @@ const getEnvVars = (configuration?: IConfiguration) => {
   return {
     GRAPHQL_URL: DEFAULT_ENV_VARS.GRAPHQL_URL,
     WS_GRAPHQL_URL: DEFAULT_ENV_VARS.WS_GRAPHQL_URL,
-    SENTRY_DSN:
-      configuration?.riderAppSentryUrl ?? DEFAULT_ENV_VARS.SENTRY_DSN,
     GOOGLE_MAPS_KEY: configuration?.googleApiKey ?? DEFAULT_ENV_VARS.GOOGLE_MAPS_KEY,
     ENVIRONMENT: DEFAULT_ENV_VARS.ENVIRONMENT,
   };

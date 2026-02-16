@@ -139,7 +139,11 @@ export default function CustomDrawerContent(
                       fontWeight: isFocused ? "bold" : "normal",
                     }}
                   >
-                    {(options.drawerLabel as string) ?? route.name}
+                    {(options.drawerLabel as string) ??
+                      route.name
+                        .replace(/\/index$/, "")
+                        .replace(/-/g, " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                   </Text>
                 </View>
 

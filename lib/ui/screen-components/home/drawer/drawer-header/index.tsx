@@ -46,19 +46,17 @@ const CustomDrawerHeader = () => {
 
   return (
     <View
-      className={` w-full h-[15%] flex-row justify-between p-3 pt-6 top-0 bottom-4`}
+      className="w-full flex-row justify-between px-4 py-4 min-h-[140px]"
       style={{ backgroundColor: appTheme.primary }}
     >
-      <View className="justify-between flex-1">
+      <View className="flex-1 min-w-0 mr-3">
         <View
-          className="w-[32px] h-[32px] rounded-full items-center justify-center overflow-hidden"
+          className="w-[40px] h-[40px] rounded-full items-center justify-center overflow-hidden mb-2"
           style={{ backgroundColor: appTheme.white }}
         >
           <Text
-            className="text-[16px] font-semibold"
-            style={{
-              color: appTheme.primary,
-            }}
+            className="text-[18px] font-semibold"
+            style={{ color: appTheme.primary }}
           >
             {dataProfile?.name
               ?.split(" ")[0]
@@ -75,43 +73,38 @@ const CustomDrawerHeader = () => {
               ) ?? "JS"}
           </Text>
         </View>
-        <View className="flex-1 pr-2">
-          <Text
-            className="font-semibold text-[16px]"
-            style={{
-              color: appTheme.black,
-            }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {dataProfile?.name ?? t("rider name")}
-          </Text>
-          <Text
-            className="font-medium"
-            style={{
-              color: appTheme.secondaryTextColor,
-            }}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {dataProfile?._id
-              ? dataProfile._id.substring(0, 9).toUpperCase()
-              : userId
-                ? userId.substring(0, 9).toUpperCase()
-                : t("rider id")}
-          </Text>
-        </View>
+        <Text
+          className="font-semibold text-[16px]"
+          style={{ color: appTheme.white }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {dataProfile?.name ?? t("rider name")}
+        </Text>
+        <Text
+          className="font-medium text-[13px] mt-0.5"
+          style={{ color: "rgba(255,255,255,0.9)" }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {dataProfile?._id
+            ? dataProfile._id.substring(0, 9).toUpperCase()
+            : userId
+              ? userId.substring(0, 9).toUpperCase()
+              : t("rider id")}
+        </Text>
       </View>
 
-      <View className="items-end justify-end gap-2">
+      <View className="items-end justify-end gap-1.5 flex-shrink-0">
         <Text
-          className="text-md"
-          style={{ color: appTheme.secondaryTextColor }}
+          className="text-[13px] font-medium"
+          style={{ color: "rgba(255,255,255,0.95)" }}
+          numberOfLines={1}
         >
           {t("Availability")}
         </Text>
         {loading || loadingProfile ? (
-          <SpinnerComponent color={appTheme.secondaryTextColor} />
+          <SpinnerComponent color="rgba(255,255,255,0.9)" />
         ) : (
           <CustomSwitch
             value={isRiderAvailable}
@@ -139,8 +132,9 @@ const CustomDrawerHeader = () => {
         )}
 
         <Text
-          className="text-xs font-medium"
-          style={{ color: appTheme.secondaryTextColor }}
+          className="text-[11px] font-medium"
+          style={{ color: "rgba(255,255,255,0.9)" }}
+          numberOfLines={1}
         >
           {isBoolean(dataProfile?.available)
             ? dataProfile?.available

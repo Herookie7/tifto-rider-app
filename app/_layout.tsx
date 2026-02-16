@@ -3,14 +3,10 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
-// import * as Sentry from "sentry-expo";
-import * as Sentry from "@sentry/react-native";
-
 import FlashMessage from "react-native-flash-message";
 
 // Service
 import setupApollo from "@/lib/apollo";
-import { initSentry } from "@/lib/utils/service";
 import getEnvVars from "@/environment";
 
 // Providers
@@ -36,8 +32,6 @@ import { useEffect, useMemo } from "react";
 
 import "../global.css";
 
-initSentry();
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen?.preventAutoHideAsync();
 
@@ -57,7 +51,6 @@ function RootLayout() {
       return {
         GRAPHQL_URL: "https://ftifto-backend.onrender.com/graphql",
         WS_GRAPHQL_URL: "wss://ftifto-backend.onrender.com/graphql",
-        SENTRY_DSN: "https://e963731ba0f84e5d823a2bbe2968ea4d@o1103026.ingest.sentry.io/6135261",
         GOOGLE_MAPS_KEY: "",
         ENVIRONMENT: "production",
       };
@@ -133,4 +126,4 @@ function RootLayout() {
   );
 }
 
-export default Sentry.wrap(RootLayout);
+export default RootLayout;

@@ -1,5 +1,6 @@
 import { Tabs, usePathname } from "expo-router";
 import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // UI Components
 import { HapticTab } from "@/lib/ui/useable-components/HapticTab";
@@ -21,6 +22,7 @@ const RootLayout = () => {
 
   // Hooks
   const pathName = usePathname();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { appTheme } = useApptheme();
 
@@ -35,8 +37,10 @@ const RootLayout = () => {
       key={tabKey}
       screenOptions={{
         tabBarActiveTintColor: appTheme.primary,
+        tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarSafeAreaInsets: { bottom: Math.max(insets.bottom, 8) },
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",

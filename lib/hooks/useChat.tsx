@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { useRoute } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
@@ -10,21 +10,22 @@ import UserContext from "../context/global/user.context";
 import { SEND_CHAT_MESSAGE } from "@/lib/apollo/mutations/chat.mutation";
 import { CHAT } from "@/lib/apollo/queries";
 import { SUBSCRIPTION_NEW_MESSAGE } from "@/lib/apollo/subscriptions";
-import { IMessage } from "react-native-gifted-chat";
-
-// Interface
 
 export const useChatScreen = () => {
-  const route = useRoute();
-
-  const { id: orderId } = route.params as { id: string };
+  const params = useLocalSearchParams<{ id?: string }>();
+  const orderId = params.id ?? "";
 
   const { dataProfile } = useContext(UserContext);
 
   // States
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Array<{
+    _id: string;
+    text: string;
+    createdAt: Date;
+    user: { _id: string; name: string };
+  }>>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [image, setImage] = useState([]);
+  const [image, setImage] = useState<string[]>([]);
 
   // API
   const { subscribeToMore: subscribeToMessages, data: chatData } = useQuery(
@@ -32,33 +33,29 @@ export const useChatScreen = () => {
     {
       variables: { order: orderId },
       fetchPolicy: "network-only",
-      //, onError,
+      skip: !orderId,
     },
   );
   const [send] = useMutation(SEND_CHAT_MESSAGE, {
-    onCompleted /* , onError */,
+    onCompleted,
   });
 
-  function onCompleted({
-    sendChatMessage: messageResult,
-  }: {
-    sendChatMessage: { success: boolean; message: string };
-  }) {
-    if (!messageResult?.success) {
+  function onCompleted(data: { sendChatMessage?: { success: boolean; message: string } }) {
+    const messageResult = data?.sendChatMessage;
+    if (messageResult && !messageResult.success) {
       Alert.alert("Error", messageResult.message);
     }
   }
-  /* function onError() {
-    Alert.alert("Error", error.message);
-  } */
 
-  //Handler
-  const onSend = () => {
+  const onSend = (messageText?: string) => {
+    if (!orderId) return;
+    const textToSend = (messageText ?? inputMessage).trim();
+    if (!textToSend) return;
     send({
       variables: {
         orderId: String(orderId),
         messageInput: {
-          message: String(inputMessage),
+          message: textToSend,
           user: {
             id: String(dataProfile?._id),
             name: String(dataProfile?.name),
@@ -70,35 +67,41 @@ export const useChatScreen = () => {
     setImage([]);
   };
 
-  // Use Effect
   useEffect(() => {
+    if (!orderId) return;
     const unsubscribe = subscribeToMessages({
       document: SUBSCRIPTION_NEW_MESSAGE,
       variables: { order: orderId },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
+        const newMessage = subscriptionData.data.subscriptionNewMessage;
+        if (!newMessage) return prev;
         return {
-          chat: [subscriptionData.data.subscriptionNewMessage, ...prev.chat],
+          chat: [newMessage, ...(prev?.chat ?? [])],
         };
       },
     });
     return unsubscribe;
-  });
+  }, [orderId, subscribeToMessages]);
 
   useEffect(() => {
-    if (chatData) {
-      setMessages(
-        chatData?.chat?.map((message: IMessage) => ({
-          _id: message?.id ?? "",
-          text: message?.message ?? "",
-          createdAt: message.createdAt,
-          user: {
-            _id: message.user.id ?? "",
-            name: message.user.name,
-          },
-        })),
-      );
-    }
+    const chat = chatData?.chat ?? [];
+    setMessages(
+      chat.map((message: {
+        id?: string;
+        message?: string;
+        createdAt?: Date;
+        user?: { id?: string; name?: string };
+      }) => ({
+        _id: message?.id ?? "",
+        text: message?.message ?? "",
+        createdAt: message.createdAt ?? new Date(),
+        user: {
+          _id: message?.user?.id ?? "",
+          name: message?.user?.name ?? "",
+        },
+      })),
+    );
   }, [chatData]);
 
   return {
@@ -109,5 +112,6 @@ export const useChatScreen = () => {
     inputMessage,
     setInputMessage,
     profile: dataProfile,
+    hasOrderId: !!orderId,
   };
 };

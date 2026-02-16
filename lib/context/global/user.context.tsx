@@ -137,8 +137,8 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
             await client.mutate({
               mutation: UPDATE_LOCATION,
               variables: {
-                lat: location.coords.latitude,
-                lng: location.coords.longitude,
+                latitude: String(location.coords.latitude),
+                longitude: String(location.coords.longitude),
               },
             });
           } catch (error) {
@@ -250,12 +250,12 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   }, [dataProfile, userId, zoneId, subscribeToMore]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isInitializing) return;
 
     refetchProfile({ id: userId }).catch((error) => {
       console.error("Error refetching profile:", error);
     });
-  }, [userId, refetchProfile]);
+  }, [userId, isInitializing]);
 
   useEffect(() => {
     // Set up listener first to catch any immediate updates

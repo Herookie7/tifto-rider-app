@@ -17,13 +17,11 @@ export const EDIT_RIDER = gql`
 `;
 
 export const UPDATE_LOCATION = gql`
-  mutation UpdateRiderLocation($lat: Float!, $lng: Float!) {
-    updateRiderLocation(lat: $lat, lng: $lng) {
+  mutation UpdateRiderLocation($latitude: String!, $longitude: String!) {
+    updateRiderLocation(latitude: $latitude, longitude: $longitude) {
       _id
-      riderProfile {
-          location {
-              coordinates
-          }
+      location {
+        coordinates
       }
     }
   }
@@ -41,9 +39,7 @@ export const TOGGLE_RIDER_AVAILABILITY = gql`
   mutation ToggleRiderAvailability {
     toggleRiderAvailability {
       _id
-      riderProfile {
-        available
-      }
+      available
     }
   }
 `;

@@ -162,6 +162,16 @@ const DrawerMain = ({
           ),
         }}
       />
+      <Drawer.Screen
+        name="holiday-request"
+        options={{
+          drawerLabel: t("Holiday Request"),
+          title: t("Holiday Request"),
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={appTheme.iconColor ?? color} />
+          ),
+        }}
+      />
     </Drawer>
   );
 };
