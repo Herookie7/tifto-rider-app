@@ -75,10 +75,11 @@ export default function AppThemeProvidor({
   }, [colorScheme]);
 
   useEffect(() => {
-    Appearance.addChangeListener(({ colorScheme }) => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       setCurrentTheme(colorScheme as app_theme);
     });
-  }, [Appearance]);
+    return () => subscription.remove();
+  }, []);
   return (
     <ThemeContext.Provider
       value={{ toggleTheme, currentTheme: currentTheme, appTheme }}

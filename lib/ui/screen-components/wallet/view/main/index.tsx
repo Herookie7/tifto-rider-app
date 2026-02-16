@@ -125,15 +125,14 @@ export default function WalletMain() {
         FlashMessageComponent({
           message:
             error.message ||
-            error.graphQLErrors[0].message ||
-            JSON.stringify(error) ||
+            (error.graphQLErrors?.[0]?.message ?? "") ||
             t("Something went wrong"),
         });
       },
       refetchQueries: [
         {
           query: RIDER_BY_ID,
-          variables: { riderId: userId },
+          variables: { id: userId },
         },
         {
           query: RIDER_TRANSACTIONS_HISTORY,

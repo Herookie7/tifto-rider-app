@@ -102,7 +102,7 @@ export default function ScheduleScreen() {
         onError: (error) => {
           FlashMessageComponent({
             message:
-              error.graphQLErrors[0]?.message ?? t("Something went wrong"),
+              error?.graphQLErrors?.[0]?.message ?? error?.message ?? t("Something went wrong"),
           });
         },
       });
@@ -160,6 +160,7 @@ export default function ScheduleScreen() {
     type: "startTime" | "endTime",
     value: string
   ) => {
+    if (!schedule) return;
     const updatedSchedule = JSON.parse(JSON.stringify(schedule));
 
     // Get the current slot

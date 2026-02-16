@@ -259,13 +259,15 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
 
   useEffect(() => {
     // Set up listener first to catch any immediate updates
-    const listener = asyncStorageEmitter.addListener("rider-id", (data) => {
+    const handler = (data: { value?: string | null }) => {
       const newUserId = data?.value ?? null;
-      if (newUserId !== userId) {
-        setUserId(newUserId);
-        setIsInitializing(false);
-      }
-    });
+      setUserId((prev) => {
+        if (newUserId !== prev) return newUserId;
+        return prev;
+      });
+      if (newUserId) setIsInitializing(false);
+    };
+    asyncStorageEmitter.addListener("rider-id", handler);
 
     // Load userId immediately
     getUserId();
@@ -279,12 +281,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
       if (locationListener.current) {
         locationListener?.current?.remove();
       }
-
-      if (listener) {
-        listener.removeListener("rider-id", () => {
-          console.log("Rider Id listener removed");
-        });
-      }
+      asyncStorageEmitter.removeListener("rider-id", handler);
     };
   }, []);
 

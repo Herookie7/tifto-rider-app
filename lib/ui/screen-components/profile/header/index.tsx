@@ -62,7 +62,7 @@ export default function ProfileHeader() {
               color: appTheme.fontSecondColor,
             }}
           >
-            {dataProfile?._id.substring(0, 9).toUpperCase() ?? "rider id"}
+            {dataProfile?._id ? dataProfile._id.substring(0, 9).toUpperCase() : t("rider id")}
           </Text>
         </View>
       </View>

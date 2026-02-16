@@ -110,7 +110,7 @@ export default function VehicleTypeMainScreen() {
       onError: (error) => {
         FlashMessageComponent({
           message:
-            error.graphQLErrors[0]?.message ?? t("Please try again later"),
+            error?.graphQLErrors?.[0]?.message ?? error?.message ?? t("Please try again later"),
         });
       },
     });

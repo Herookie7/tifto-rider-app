@@ -32,7 +32,6 @@ import { useApolloClient } from "@apollo/client";
 import { useApptheme } from "@/lib/context/global/theme.context";
 import { ILoginInitialValues } from "@/lib/utils/interfaces";
 import { CustomContinueButton } from "../../useable-components";
-import { set } from "lodash";
 
 const initial: ILoginInitialValues = {
   username: "",

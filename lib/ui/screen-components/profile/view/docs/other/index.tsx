@@ -50,7 +50,7 @@ export default function OtherDetailsSection({
         <Text style={{ color: appTheme.fontSecondColor }}>{t("Email")}</Text>
         <View className="flex-1 h-12 text-base text-black">
           <Text className="h-12" style={{ color: appTheme.fontSecondColor }}>
-            {dataProfile?.email ?? "example@email.com"}
+            {dataProfile?.email ?? t("Not set")}
           </Text>
         </View>
       </View>
@@ -80,7 +80,7 @@ export default function OtherDetailsSection({
         <Text style={{ color: appTheme.fontSecondColor }}>{t("Phone")}</Text>
         <View className="flex-1 h-12 text-base text-black">
           <Text className="h-12" style={{ color: appTheme.fontSecondColor }}>
-            {dataProfile?.phone ?? "+324 234 328979"}
+            {dataProfile?.phone ?? t("Not set")}
           </Text>
         </View>
       </View>
