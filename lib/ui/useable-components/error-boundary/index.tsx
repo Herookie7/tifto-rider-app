@@ -83,6 +83,7 @@ function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () =>
           {error?.message || "An unexpected error occurred"}
         </Text>
         <TouchableOpacity
+          testID="error-boundary-try-again"
           style={[styles.button, { backgroundColor: appTheme.primary }]}
           onPress={onReset}
         >

@@ -6,16 +6,20 @@ import {
   RIDER_TRANSACTIONS_HISTORY,
 } from "@/lib/apollo/queries";
 import { useQuery } from "@apollo/client";
+import { useUserContext } from "@/lib/context/global/user.context";
+
 export default function WalletScreen() {
   // Hooks
   const { appTheme } = useApptheme();
+  const { userId } = useUserContext();
   const [refreshing, setRefreshing] = useState(false);
 
   const {
     refetch,
-  } = useQuery(
-    RIDER_TRANSACTIONS_HISTORY,
-  )     
+  } = useQuery(RIDER_TRANSACTIONS_HISTORY, {
+    variables: { userType: "RIDER", userId: userId || "" },
+    skip: !userId,
+  })     
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

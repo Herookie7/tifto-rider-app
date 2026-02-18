@@ -9,112 +9,119 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import SplashVideo from "./SplashVideo";
+
+// Use simple splash in production to avoid expo-video/React 19 compatibility issues
+const USE_VIDEO_SPLASH = __DEV__;
+
+function SplashVideoWrapper({
+  onLoaded,
+  onFinish,
+}: {
+  onLoaded: () => void;
+  onFinish: () => void;
+}) {
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        await SplashScreen.hideAsync();
+        if (mounted) onLoaded();
+        await new Promise((r) => setTimeout(r, USE_VIDEO_SPLASH ? 500 : 800));
+        if (mounted) onFinish();
+      } catch {
+        if (mounted) {
+          onLoaded();
+          onFinish();
+        }
+      }
+    })();
+    return () => { mounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!USE_VIDEO_SPLASH) {
+    return <View style={[StyleSheet.absoluteFill, { backgroundColor: "black" }]} />;
+  }
+
+  try {
+    const SplashVideo = require("./SplashVideo").default;
+    return <SplashVideo onLoaded={onLoaded} onFinish={onFinish} />;
+  } catch {
+    return <View style={[StyleSheet.absoluteFill, { backgroundColor: "black" }]} />;
+  }
+}
 
 export default function AnimatedSplashScreen({ children }: any) {
-  const opacityAnimation = useSharedValue(1); // Shared value for opacity
-  const scaleAnimation = useSharedValue(1); // Shared value for scale
+  const opacityAnimation = useSharedValue(1);
+  const scaleAnimation = useSharedValue(1);
   const [isAppReady, setAppReady] = useState(false);
   const [isSplashVideoComplete, setSplashVideoComplete] = useState(false);
   const [isSplashAnimationComplete, setAnimationComplete] = useState(false);
 
-  // Timeout fallback to ensure app always loads (max 3 seconds after video should complete)
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!isSplashAnimationComplete) {
-        console.log("Splash screen timeout - forcing transition");
-        SplashScreen.hideAsync().catch(() => { }); // Ensure native splash is hidden
+        SplashScreen.hideAsync().catch(() => {});
         setAnimationComplete(true);
         opacityAnimation.value = withTiming(0, { duration: 300 });
         scaleAnimation.value = withTiming(2, { duration: 300 });
       }
-    }, 3000);
-
+    }, 4000);
     return () => clearTimeout(timeout);
   }, [isSplashAnimationComplete, opacityAnimation, scaleAnimation]);
 
   useEffect(() => {
     if (isAppReady && isSplashVideoComplete) {
-      console.log("Splash: Starting fade out animation");
-      // Start fade out and scale down animation when the app is ready and video has completed
       opacityAnimation.value = withTiming(0, {
         duration: 300,
         easing: Easing.out(Easing.exp),
       });
-
       scaleAnimation.value = withTiming(
         2,
-        {
-          duration: 300,
-          easing: Easing.out(Easing.exp),
-        },
-        () => {
-          console.log("Splash: Animation completed, showing app content");
-          runOnJS(setAnimationComplete)(true); // Update the animation completion state
-        },
+        { duration: 300, easing: Easing.out(Easing.exp) },
+        () => runOnJS(setAnimationComplete)(true)
       );
-    } else {
-      console.log("Splash: Waiting for app ready and video complete", { isAppReady, isSplashVideoComplete });
     }
   }, [isAppReady, isSplashVideoComplete]);
 
   const onImageLoaded = useCallback(async () => {
     try {
-      console.log("Splash: Video loaded, hiding splash screen");
       await SplashScreen.hideAsync();
-      // Load stuff
-      await Promise.all([]);
-      console.log("Splash: App resources loaded");
-    } catch (e) {
-      console.error("Splash: Error hiding splash screen:", e);
-      // Handle errors - still mark as ready
+    } catch {
+      // ignore
     } finally {
-      console.log("Splash: Marking app as ready");
       setAppReady(true);
     }
   }, []);
 
-  // Fallback: If video doesn't complete after 2 seconds of being ready, force completion
   useEffect(() => {
     if (isAppReady && !isSplashVideoComplete) {
-      const fallbackTimeout = setTimeout(() => {
-        console.log("Video completion fallback - marking video as complete");
-        setSplashVideoComplete(true);
-      }, 2000);
-
-      return () => clearTimeout(fallbackTimeout);
+      const t = setTimeout(() => setSplashVideoComplete(true), 2000);
+      return () => clearTimeout(t);
     }
   }, [isAppReady, isSplashVideoComplete]);
 
-  const videoElement = useMemo(() => {
-    return (
-      <SplashVideo
+  const videoElement = useMemo(
+    () => (
+      <SplashVideoWrapper
         onLoaded={onImageLoaded}
-        onFinish={() => {
-          console.log("Splash: Video finished playing");
-          setSplashVideoComplete(true); // Mark video as complete
-        }}
+        onFinish={() => setSplashVideoComplete(true)}
       />
-    );
-  }, [onImageLoaded]);
+    ),
+    [onImageLoaded]
+  );
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacityAnimation.value, // Use shared value for opacity
-      transform: [{ scale: scaleAnimation.value }], // Use shared value for scale
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacityAnimation.value,
+    transform: [{ scale: scaleAnimation.value }],
+  }));
 
   return (
     <View style={{ flex: 1 }}>
       {isSplashAnimationComplete ? children : null}
       <Animated.View
         pointerEvents="none"
-        style={[
-          StyleSheet.absoluteFill,
-          animatedStyle,
-          { backgroundColor: "black" },
-        ]}
+        style={[StyleSheet.absoluteFill, animatedStyle, { backgroundColor: "black" }]}
       >
         {videoElement}
       </Animated.View>

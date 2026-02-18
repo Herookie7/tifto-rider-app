@@ -140,6 +140,7 @@ const LoginScreen = () => {
                     }}
                   >
                     <TextInput
+                      testID="login-email-input"
                       className="flex-1 h-12 text-base"
                       style={{ color: appTheme.fontMainColor }}
                       placeholder={t("Email")}
@@ -166,12 +167,12 @@ const LoginScreen = () => {
                     }}
                   >
                     <TextInput
+                      testID="login-password-input"
                       className="flex-1 h-12 text-base"
                       style={{ color: appTheme.fontMainColor }}
                       placeholder={t("Password")}
                       secureTextEntry={!passwordVisible}
                       placeholderTextColor={appTheme.fontSecondColor}
-
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
@@ -195,6 +196,7 @@ const LoginScreen = () => {
 
                   {/* Login Button */}
                   <CustomContinueButton
+                    testID="login-submit-button"
                     title={t("Login")}
                     onPress={() => handleSubmit()}
                     className="self-center"
