@@ -66,9 +66,9 @@ fi
 EXPO_CLI="node_modules/expo/bin/cli"
 echo "Running expo prebuild --clean (regenerates native project with correct autolinking)..."
 if [ -f "$EXPO_CLI" ]; then
-    node "$EXPO_CLI" prebuild --platform android --clean
+    node "$EXPO_CLI" prebuild --platform android --clean --no-interactive
 else
-    npx expo prebuild --platform android --clean
+    npx expo prebuild --platform android --clean --no-interactive
 fi
 echo "✓ Android native code generated with all native modules autolinked"
 
