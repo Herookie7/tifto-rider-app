@@ -61,7 +61,7 @@ const setupApollo = (envVars: EnvVars) => {
         fields: {
           distanceWithCurrentLocation: {
             read(_existing: IRestaurantLocation, { variables, readField }) {
-              const restaurantLocation: IRestaurantLocation | undefined =
+              const restaurantLocation: any =
                 readField("location");
               if (
                 !restaurantLocation?.coordinates[0] ||

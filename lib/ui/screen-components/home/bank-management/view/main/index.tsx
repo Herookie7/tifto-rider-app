@@ -111,8 +111,8 @@ export default function BankManagementMain() {
       }
       await mutateBankDetails({
         variables: {
-          updateRiderBussinessDetailsId: userId,
-          bussinessDetails: {
+          updateRiderBusinessDetailsId: userId,
+          businessDetails: {
             bankName: formData.bankName,
             accountName: formData.accountName,
             accountNumber: Number(formData.accountNumber),
@@ -133,19 +133,19 @@ export default function BankManagementMain() {
   useEffect(() => {
     if (
       !areBankDetailsLoading &&
-      dataProfile?.bussinessDetails &&
-      Object.values(dataProfile?.bussinessDetails).length > 0
+      dataProfile?.businessDetails &&
+      Object.values(dataProfile?.businessDetails).length > 0
     ) {
       setFormData({
-        bankName: dataProfile?.bussinessDetails.bankName ?? "",
-        accountName: dataProfile?.bussinessDetails.accountName ?? "",
+        bankName: dataProfile?.businessDetails.bankName ?? "",
+        accountName: dataProfile?.businessDetails.accountName ?? "",
         accountNumber: String(
-          dataProfile?.bussinessDetails.accountNumber ?? "",
+          dataProfile?.businessDetails.accountNumber ?? "",
         ),
-        accountCode: dataProfile?.bussinessDetails.accountCode ?? "",
+        accountCode: dataProfile?.businessDetails.accountCode ?? "",
       });
     }
-  }, [dataProfile?.bussinessDetails, areBankDetailsLoading]);
+  }, [dataProfile?.businessDetails, areBankDetailsLoading]);
   return (
     <View>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

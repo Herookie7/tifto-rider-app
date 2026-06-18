@@ -29,7 +29,7 @@ export const UPDATE_LOCATION = gql`
 
 export const UPDATE_AVAILABILITY = gql`
   mutation ToggleRider($id: String!) {
-    toggleAvailablity(id: $id) {
+    toggleAvailability(id: $id) {
       _id
     }
   }
@@ -95,13 +95,13 @@ export const UPDATE_VEHICLE = gql`
   }
 `;
 export const UPDATE_BUSINESS_DETAILS = gql`
-  mutation UpdateRiderBussinessDetails(
-    $bussinessDetails: BussinessDetailsInput
-    $updateRiderBussinessDetailsId: String!
+  mutation UpdateRiderBusinessDetails(
+    $businessDetails: BusinessDetailsInput
+    $updateRiderBusinessDetailsId: String!
   ) {
-    updateRiderBussinessDetails(
-      bussinessDetails: $bussinessDetails
-      id: $updateRiderBussinessDetailsId
+    updateRiderBusinessDetails(
+      businessDetails: $businessDetails
+      id: $updateRiderBusinessDetailsId
     ) {
       _id
     }

@@ -91,7 +91,7 @@ const getStoredLanguage = async (): Promise<void> => {
         lng: initialLang,
         fallbackLng: "en",
         resources: languageResources,
-        compatibilityJSON: "v3",
+        compatibilityJSON: "v3" as any,
         interpolation: {
           escapeValue: false,
         },
@@ -109,7 +109,7 @@ const getStoredLanguage = async (): Promise<void> => {
           lng: "en",
           fallbackLng: "en",
           resources: languageResources,
-          compatibilityJSON: "v3",
+          compatibilityJSON: "v3" as any,
           interpolation: {
             escapeValue: false,
           },
@@ -130,7 +130,7 @@ getStoredLanguage().catch((error) => {
       lng: "en",
       fallbackLng: "en",
       resources: languageResources,
-      compatibilityJSON: "v3",
+      compatibilityJSON: "v3" as any,
       interpolation: {
         escapeValue: false,
       },

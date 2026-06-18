@@ -32,7 +32,7 @@ export default function VehicleTypeMainScreen() {
   const { appTheme } = useApptheme();
   const { t } = useTranslation();
 
-  const vehicleMap: Record<string, JSX.Element> = {
+  const vehicleMap: Record<string, any> = {
     bicycle: <BikeRidingIcon color={appTheme.fontMainColor} />,
     motorbike: <MotorBikeIcon color={appTheme.fontMainColor} />,
     car: <CarIcon color={appTheme.fontMainColor} />,

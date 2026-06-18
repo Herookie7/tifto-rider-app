@@ -12,7 +12,7 @@ const LocationContext = React.createContext<ILocationContextProps>(
 );
 
 export const LocationProvider = ({ children }: ILocationProviderProps) => {
-  const locationListener = useRef<Location.LocationSubscription>();
+  const locationListener = useRef<Location.LocationSubscription | undefined>(undefined);
   const [locationPermission, setLocationPermission] = useState(false);
   const [location, setLocation] = useState<ICoodinates>({} as ICoodinates);
 

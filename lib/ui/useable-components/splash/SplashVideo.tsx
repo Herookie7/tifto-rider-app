@@ -1,6 +1,6 @@
-import { StyleSheet, View } from 'react-native';
-import { useRef, useState, useEffect } from 'react';
-import { VideoView, useVideoPlayer, VideoPlayer } from 'expo-video';
+import { StyleSheet, View } from "react-native";
+import { useRef, useState, useEffect } from "react";
+import { VideoView, useVideoPlayer, VideoPlayer } from "expo-video";
 
 interface SplashVideoProps {
   onLoaded?: () => void;
@@ -21,10 +21,31 @@ export default function SplashVideo({ onLoaded, onFinish }: SplashVideoProps) {
   });
 
   useEffect(() => {
-    // Error handling
-    const errorSubscription = player.addListener('error', (error) => {
-      console.log('Splash video error:', error);
-      // Handle error as finish so app proceeds
+    // statusChange listener handles both success (readyToPlay) and error conditions
+    const statusSubscription = player.addListener("statusChange", (status) => {
+      console.log("Video status changed:", status.status);
+
+      if (status.status === "readyToPlay" && !hasLoaded) {
+        setHasLoaded(true);
+        onLoaded?.();
+      }
+
+      if (status.status === "error" && !hasFinished) {
+        console.log("Splash video error:", status.error);
+        setHasFinished(true);
+        onFinish?.();
+      }
+
+      if (status.status === "idle" && hasLoaded && !hasFinished) {
+        console.log("Video finished playing (idle status)");
+        setHasFinished(true);
+        onFinish?.();
+      }
+    });
+
+    // playToEnd listener handles video completion
+    const playToEndSubscription = player.addListener("playToEnd", () => {
+      console.log("Video finished playing (playToEnd)");
       if (!hasFinished) {
         setHasFinished(true);
         onFinish?.();
@@ -32,66 +53,8 @@ export default function SplashVideo({ onLoaded, onFinish }: SplashVideoProps) {
     });
 
     return () => {
-      errorSubscription.remove();
-    };
-  }, [player, hasFinished, onFinish]);
-
-  useEffect(() => {
-    const subscription = player.addListener('statusChange', (status) => {
-      console.log('Video status:', status); // Debug log
-
-      if (status.isLoaded && !hasLoaded) {
-        setHasLoaded(true);
-        onLoaded?.();
-      }
-    });
-
-    // Try multiple possible event names for video end
-    const endSubscription1 = player.addListener('playToEnd', () => {
-      console.log('Video ended (playToEnd)'); // Debug log
-      if (!hasFinished) {
-        setHasFinished(true);
-        onFinish?.();
-      }
-    });
-
-    const endSubscription2 = player.addListener('playbackEnd', () => {
-      console.log('Video ended (playbackEnd)'); // Debug log
-      if (!hasFinished) {
-        setHasFinished(true);
-        onFinish?.();
-      }
-    });
-
-    const endSubscription3 = player.addListener('didJustFinish', () => {
-      console.log('Video ended (didJustFinish)'); // Debug log
-      if (!hasFinished) {
-        setHasFinished(true);
-        onFinish?.();
-      }
-    });
-
-    // Also try checking status changes for completion
-    const statusSubscription = player.addListener('statusChange', (status) => {
-      if (status.status === 'readyToPlay' && !hasLoaded) {
-        setHasLoaded(true);
-        onLoaded?.();
-      }
-
-      // Check if video has finished playing
-      if ((status.status === 'idle' || status.didJustFinish) && hasLoaded && !hasFinished) {
-        console.log('Video ended via status change'); // Debug log
-        setHasFinished(true);
-        onFinish?.();
-      }
-    });
-
-    return () => {
-      subscription?.remove();
-      endSubscription1?.remove();
-      endSubscription2?.remove();
-      endSubscription3?.remove();
       statusSubscription?.remove();
+      playToEndSubscription?.remove();
     };
   }, [player, hasLoaded, hasFinished, onLoaded, onFinish]);
 

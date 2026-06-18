@@ -49,9 +49,11 @@ export default function Layout() {
         ),
 
         tabBarButton: (props) => {
+          const { ref, ...rest } = props as any;
           return (
             <Pressable
-              {...props}
+              ref={ref}
+              {...rest}
               android_ripple={{ color: "transparent" }} // Remove ripple on Android
               style={({ pressed }) => [
                 props.style,

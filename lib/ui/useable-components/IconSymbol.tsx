@@ -14,12 +14,7 @@ const MAPPING = {
   apartment: "apartment",
   "access-time": "access-time",
   "directions-bike": "directions-bike",
-} as Partial<
-  Record<
-    import("expo-symbols").SymbolViewProps["name"],
-    React.ComponentProps<typeof MaterialIcons>["name"]
-  >
->;
+} as Record<string, React.ComponentProps<typeof MaterialIcons>["name"]>;
 
 export type IconSymbolName = keyof typeof MAPPING;
 

@@ -68,7 +68,7 @@ function App() {
             shouldShowAlert: false, // Prevent the app from closing
             shouldPlaySound: false,
             shouldSetBadge: false,
-          };
+          } as any;
         },
       });
     }
@@ -84,7 +84,9 @@ function App() {
         response.notification.request.content.data
       ) {
         try {
-          const { _id } = response.notification.request.content.data;
+          const payload = response.notification.request.content.data as { _id?: string };
+          const _id = payload?._id;
+          if (!_id) return;
           const { data } = await client.query({
             query: RIDER_ORDERS,
             fetchPolicy: "network-only",
@@ -97,7 +99,7 @@ function App() {
           await AsyncStorage.setItem("@lastNotificationHandledId", _id);
 
           router.navigate("/order-detail");
-          router.setParams({ itemId: _id, order });
+          router.setParams({ itemId: _id, order: JSON.stringify(order) as any });
         } catch (error) {
           console.error("Error handling notification:", error);
         }
@@ -124,7 +126,7 @@ function App() {
           shouldShowAlert: false, // Prevent the app from closing
           shouldPlaySound: false,
           shouldSetBadge: false,
-        };
+        } as any;
       },
     });
   }, []);

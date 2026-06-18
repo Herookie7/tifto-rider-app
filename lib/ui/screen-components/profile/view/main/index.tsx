@@ -1,5 +1,6 @@
 import { useApptheme } from "@/lib/context/global/theme.context";
 import { IRiderProfileMainProps } from "@/lib/utils/interfaces/rider-profile.interface";
+import { TRiderProfileBottomBarBit } from "@/lib/utils/types/rider";
 import { View } from "react-native";
 import DocumentsSection from "../docs/documents";
 import OtherDetailsSection from "../docs/other";

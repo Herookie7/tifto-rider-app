@@ -152,7 +152,7 @@ export default function WalletMain() {
           message: t("Withdraw request cancelled successfully"),
         });
         // Refetch queries
-        fetchRiderCurrentWithdrawRequest({ riderId: userId });
+        fetchRiderCurrentWithdrawRequest({ riderId: userId ?? "" });
         fetchRiderProfile();
       },
       onError: (error) => {

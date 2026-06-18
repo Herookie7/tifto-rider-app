@@ -12,7 +12,9 @@ export interface AppTheme {
   themeBackground: string;
   iconColor: string;
   tagColor: string;
-  iconPink: string;
+  iconColorPink: string;
+  cardBackground: string;
+  borderColor: string;
   radioColor: string;
   radioOuterColor: string;
   spinnerColor: string;

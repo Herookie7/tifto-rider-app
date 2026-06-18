@@ -7,7 +7,7 @@ import { useMemo } from "react";
 
 export default function RootStackLayout() {
   // Hooks with error handling
-  let appTheme;
+  let appTheme: any;
   try {
     const themeContext = useApptheme();
     appTheme = themeContext?.appTheme;

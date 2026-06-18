@@ -28,7 +28,7 @@ const CustomDrawerHeader = () => {
   }, [dataProfile?.available]);
 
   // Queries
-  const [toggleAvailablity, { loading }] = useMutation(UPDATE_AVAILABILITY, {
+  const [toggleAvailability, { loading }] = useMutation(UPDATE_AVAILABILITY, {
     refetchQueries: [
       { query: RIDER_PROFILE, variables: { id: dataProfile?._id?.toString() || userId || "" } },
     ],
@@ -66,9 +66,9 @@ const CustomDrawerHeader = () => {
                 "",
                 dataProfile?.name?.split(" ")[1]?.length
                   ? (dataProfile?.name
-                      ?.split(" ")[1]
-                      ?.substring(0, 1)
-                      ?.toUpperCase() ?? "")
+                    ?.split(" ")[1]
+                    ?.substring(0, 1)
+                    ?.toUpperCase() ?? "")
                   : ""
               ) ?? "JS"}
           </Text>
@@ -107,6 +107,7 @@ const CustomDrawerHeader = () => {
           <SpinnerComponent color="rgba(255,255,255,0.9)" />
         ) : (
           <CustomSwitch
+            testID="drawer-availability-switch"
             value={isRiderAvailable}
             isDisabled={loading || !dataProfile?._id || !userId}
             onToggle={async () => {
@@ -120,7 +121,7 @@ const CustomDrawerHeader = () => {
                   return;
                 }
 
-                await toggleAvailablity({
+                await toggleAvailability({
                   variables: { id: riderId },
                 });
               } catch (error) {

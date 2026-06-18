@@ -1,6 +1,6 @@
 export const getCoupon = `#graphql
 mutation Coupon($coupon:String!){
-    coupon(coupon:$coupon){
+    getCoupon(coupon:$coupon){
       _id
       title
       discount

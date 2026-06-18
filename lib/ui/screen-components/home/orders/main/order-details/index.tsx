@@ -330,7 +330,7 @@ export default function OrderDetailScreen() {
               zIndex: 1,
             }}
           >
-            <TouchableOpacity onPress={openMaps}>
+            <TouchableOpacity testID="order-detail-navigation-button" onPress={openMaps}>
               <Icons
                 name="navigation"
                 size={30}
@@ -364,35 +364,27 @@ export default function OrderDetailScreen() {
                 <Marker
                   coordinate={deliveryAddressPin.location}
                   title={t("Delivery Address")}
+                  pinColor="blue"
                   onPress={() => {
                     linkToMapsApp(
                       deliveryAddressPin.location,
                       deliveryAddressPin.label,
                     );
                   }}
-                >
-                  <Image
-                    source={require("@/lib/assets/home_icon.png")}
-                    style={{ height: 35, width: 32 }}
-                  />
-                </Marker>
+                />
               )}
               {restaurantAddressPin?.location && (
                 <Marker
                   coordinate={restaurantAddressPin.location}
                   title={t("Restaurant")}
+                  pinColor="red"
                   onPress={() => {
                     linkToMapsApp(
                       restaurantAddressPin.location,
                       restaurantAddressPin.label,
                     );
                   }}
-                >
-                  <Image
-                    source={require("@/lib/assets/rest_icon.png")}
-                    style={{ height: 35, width: 32 }}
-                  />
-                </Marker>
+                />
               )}
               {/* Added multiple validation checks for rider marker to prevent array index errors */}
               {locationPin?.location &&
@@ -401,6 +393,7 @@ export default function OrderDetailScreen() {
                     coordinate={{ latitude, longitude }}
                     title="Rider"
                     description={t("This is rider's location")}
+                    pinColor="green"
                     onPress={() => {
                       if (
                         locationPin?.location &&
@@ -409,12 +402,7 @@ export default function OrderDetailScreen() {
                         linkToMapsApp(locationPin.location, locationPin.label);
                       }
                     }}
-                  >
-                    <Image
-                      source={require("@/lib/assets/rider_icon.png")}
-                      style={{ height: 35, width: 32 }}
-                    />
-                  </Marker.Animated>
+                  />
                 )}
 
               {/* Added validation for rider to restaurant directions */}
@@ -658,6 +646,7 @@ export default function OrderDetailScreen() {
               {tab === "processing" &&
                 localOrder.orderStatus === "assigned" && (
                   <TouchableOpacity
+                    testID="order-detail-pickup-button"
                     className="h-14 rounded-3xl py-3 w-full mt-4 mb-10"
                     style={{ backgroundColor: appTheme.primary }}
                     disabled={loadingOrderStatus}
@@ -683,6 +672,7 @@ export default function OrderDetailScreen() {
               {tab == "processing" && localOrder.orderStatus === "picked" && (
                 <View className="flex flex-col gap-3 mt-4 mb-10">
                   <TouchableOpacity
+                    testID="order-detail-delivered-button"
                     className="h-14 rounded-3xl py-3 w-full"
                     style={{ backgroundColor: appTheme.primary }}
                     disabled={loadingOrderStatus}
@@ -709,6 +699,7 @@ export default function OrderDetailScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    testID="order-detail-not-delivered-button"
                     className="h-14 rounded-3xl py-3 w-full border-2"
                     style={{
                       borderColor: appTheme.primary,
@@ -731,6 +722,7 @@ export default function OrderDetailScreen() {
                 localOrder.orderStatus === "accepted" && (
                   <View style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom : insets.bottom + 10 }}>
                     <CustomContinueButton
+                      testID="order-detail-assign-me-button"
                       title={t("Assign me")}
                       className="w-[55%] mx-auto"
                       onPress={() =>

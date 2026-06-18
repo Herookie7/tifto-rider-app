@@ -122,25 +122,18 @@ const useDetails = (orderData: IOrder) => {
     }
   }
 
-  function onError({
-    cause,
-    graphQLErrors,
-    networkError,
-  }: {
-    graphQLErrors: ReadonlyArray<GraphQLFormattedError>;
-    networkError: Error | ServerParseError | ServerError | null;
-  }) {
+  function onError(error: any) {
     let message = t("Something went wrong");
-    if (networkError) message = "Internal Server Error";
-    if (graphQLErrors) message = graphQLErrors.map((o) => o.message).join(", ");
-    if (cause) message = cause.message;
+    if (error.networkError) message = "Internal Server Error";
+    if (error.graphQLErrors) message = error.graphQLErrors.map((o: any) => o.message).join(", ");
+    if (error.message) message = error.message;
     // FlashMessageComponent({ message: message });
     console.log({ message });
   }
 
   async function update(cache: ApolloCache<any>, { data }: FetchResult<any>) {
     if (data?.assignOrder) {
-      const existingData = cache.readQuery({ query: RIDER_ORDERS });
+      const existingData = cache.readQuery({ query: RIDER_ORDERS }) as { riderOrders: IOrder[] } | null;
       if (existingData) {
         const index = existingData.riderOrders.findIndex(
           (o: IOrder) => o._id === data.assignOrder._id,
@@ -157,7 +150,7 @@ const useDetails = (orderData: IOrder) => {
       }
     }
     if (data?.updateOrderStatusRider) {
-      const existingData = cache.readQuery({ query: RIDER_ORDERS });
+      const existingData = cache.readQuery({ query: RIDER_ORDERS }) as { riderOrders: IOrder[] } | null;
       if (existingData) {
         const index = existingData.riderOrders.findIndex(
           (o: IOrder) => o._id === data.updateOrderStatusRider._id,

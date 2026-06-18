@@ -174,9 +174,10 @@ export default function VehiclePlateForm({
 
   useEffect(() => {
     // Check if dataProfile has correct fields, fallback if needed
+    const details = dataProfile?.vehicleDetails as any;
     setFormData({
-      vehicleNumber: dataProfile?.vehicleDetails?.vehicleNumber ?? dataProfile?.vehicleDetails?.number ?? "",
-      vehicleImage: dataProfile?.vehicleDetails?.vehicleImage ?? dataProfile?.vehicleDetails?.image ?? "",
+      vehicleNumber: details?.vehicleNumber ?? details?.number ?? "",
+      vehicleImage: details?.vehicleImage ?? details?.image ?? "",
     });
   }, [dataProfile]);
   return (

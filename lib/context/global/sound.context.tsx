@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { useContext, useEffect, useState, createContext } from "react";
-import { AudioPlayer, useAudioPlayer, AudioSource } from "expo-audio";
+import { AudioPlayer, useAudioPlayer, AudioSource, useAudioPlayerStatus } from "expo-audio";
 // Interface
 import {
   ISoundContext,
@@ -22,6 +22,7 @@ export const SoundProvider = ({ children }: ISoundContextProviderProps) => {
 
   // Create audio player
   const player = useAudioPlayer(require("@/lib/assets/sound/beep3.mp3") as AudioSource);
+  const status = useAudioPlayerStatus(player);
 
   // Handlers
   const playSound = async () => {
@@ -53,14 +54,8 @@ export const SoundProvider = ({ children }: ISoundContextProviderProps) => {
 
   // Audio player event listeners
   useEffect(() => {
-    const playingSubscription = player.addListener('playingChange', (isPlaying) => {
-      setIsPlaying(isPlaying);
-    });
-
-    return () => {
-      playingSubscription?.remove();
-    };
-  }, [player]);
+    setIsPlaying(status.playing);
+  }, [status.playing]);
 
   // Use Effect
   useEffect(() => {

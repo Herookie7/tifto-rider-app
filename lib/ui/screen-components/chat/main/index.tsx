@@ -7,6 +7,7 @@ import { useChatScreen } from "@/lib/hooks/useChat";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
+const GiftedChatComponent = GiftedChat as any;
 
 export default function ChatMain() {
   // Hooks
@@ -120,7 +121,7 @@ export default function ChatMain() {
           { backgroundColor: appTheme.screenBackground },
         ]}
       >
-        <GiftedChat
+        <GiftedChatComponent
           messages={messages}
           user={{
             _id: profile?._id ?? "",
@@ -128,7 +129,7 @@ export default function ChatMain() {
           }}
           renderBubble={renderBubble}
           renderSend={renderSend}
-          onSend={(msg) => {
+          onSend={(msg: any) => {
             const text = msg?.[0]?.text;
             if (text) onSend(text);
           }}
@@ -147,7 +148,7 @@ export default function ChatMain() {
           messagesContainerStyle={{
             backgroundColor: appTheme.screenBackground,
           }}
-          onInputTextChanged={(m) => setInputMessage(String(m ?? ""))}
+          onInputTextChanged={(m: string) => setInputMessage(String(m ?? ""))}
         />
       </View>
     </KeyboardAvoidingView>

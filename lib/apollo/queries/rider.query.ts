@@ -69,7 +69,7 @@ export const RIDER_PROFILE = gql`
       zone {
         _id
       }
-      bussinessDetails {
+      businessDetails {
         bankName
         accountName
         accountCode

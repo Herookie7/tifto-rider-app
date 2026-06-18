@@ -27,7 +27,7 @@ function UnavailableStatus() {
       paddingHorizontal: 16,
       paddingBottom: 2,
       position: "absolute" as const,
-      width: "100%",
+      width: "100%" as const,
       zIndex: 50,
     }),
     [insets.top]

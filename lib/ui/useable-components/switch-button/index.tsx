@@ -3,11 +3,12 @@ import { CustomSwitchProps } from "@/lib/utils/interfaces/custom-input-switch";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Switch, TouchableOpacity, View } from "react-native";
 
-const CustomSwitch = ({ value, onToggle, isDisabled }: CustomSwitchProps) => {
+const CustomSwitch = ({ value, onToggle, isDisabled, testID }: CustomSwitchProps) => {
   // Hooks
   const { appTheme } = useApptheme();
   return (
     <TouchableOpacity
+      testID={testID}
       disabled={isDisabled}
       className={`flex-row items-center ${isDisabled && "opacity-35"}`}
       onPress={() => onToggle(!value)}

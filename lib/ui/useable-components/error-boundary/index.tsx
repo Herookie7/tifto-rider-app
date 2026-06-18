@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useApptheme } from "@/lib/context/global/theme.context";
 import { Colors } from "@/lib/utils/constants";
+import { AppTheme } from "@/lib/utils/interfaces/app-theme";
 
 interface Props {
   children: ReactNode;
@@ -64,7 +65,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
 function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () => void }) {
   // Use theme with fallback in case theme context fails
-  let appTheme = Colors.light;
+  let appTheme: AppTheme = Colors.light;
   try {
     const themeContext = useApptheme();
     appTheme = themeContext?.appTheme || Colors.light;

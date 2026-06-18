@@ -57,13 +57,12 @@ export const RIDER_GRAND_TOTAL_EARNINGS = gql`
       dateFilter: $dateFilter
     ) {
       data {
-        earnings {
-          grandTotalEarnings {
-            riderTotal
-          }
+        grandTotalEarnings {
+          riderTotal
         }
-        message
       }
+      message
     }
   }
+
 `;

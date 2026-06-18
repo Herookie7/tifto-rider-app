@@ -54,7 +54,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Refs
-  const locationListener = useRef<LocationSubscription>();
+  const locationListener = useRef<LocationSubscription | undefined>(undefined);
   const coordinatesRef = useRef<LocationObject>({} as LocationObject);
 
   // Context
@@ -69,7 +69,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
     fetchPolicy: "cache-first",
     skip: !userId || isInitializing,
     variables: {
-      id: userId,
+      id: userId as string,
     },
   }) as QueryResult<IRiderProfileResponse | undefined, { id: string }>;
 

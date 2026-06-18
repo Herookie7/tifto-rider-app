@@ -26,7 +26,7 @@ export interface IUserContextProps {
   riderOrderEarnings: IRiderEarningsArray[];
   setRiderOrderEarnings: Dispatch<SetStateAction<IRiderEarningsArray[]>>;
 }
-export interface IUserProviderProps extends IGlobalProviderProps {}
+export interface IUserProviderProps extends IGlobalProviderProps { }
 
 interface Zone {
   __typename: string;
@@ -79,7 +79,7 @@ export interface IRiderProfile {
   createdAt: string;
   updatedAt: string;
   assigned: string[];
-  bussinessDetails: {
+  businessDetails: {
     bankName: string;
     accountName: string;
     accountCode: string;

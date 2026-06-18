@@ -5,8 +5,18 @@ import { IRestaurantProfile } from "./resturant.interface";
 import { IRiderProfile } from "./user.interface";
 
 export interface IOrderComponentProps extends IGlobalComponentProps {
-
+  _id: string;
+  orderId: string;
+  orderStatus: string;
+  restaurant: any;
+  deliveryAddress: any;
+  paymentMethod?: string;
+  orderAmount: number;
+  paymentStatus: string;
+  acceptedAt: string;
+  user: any;
   tab: ORDER_TYPE;
+  isLast?: boolean;
 }
 
 export interface IOrder {

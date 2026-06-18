@@ -54,12 +54,9 @@ export const useChatScreen = () => {
     send({
       variables: {
         orderId: String(orderId),
-        messageInput: {
+        message: {
           message: textToSend,
-          user: {
-            id: String(dataProfile?._id),
-            name: String(dataProfile?.name),
-          },
+          userId: String(dataProfile?._id),
         },
       },
     });

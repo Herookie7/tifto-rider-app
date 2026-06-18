@@ -15,7 +15,7 @@ const useOrderDetail = () => {
   // Hooks
   const { appTheme } = useApptheme();
   const navigation = useNavigation();
-  const route = useRoute();
+  const route = useRoute<any>();
   const router = useRouter();
   const [tab] = useState(route.params?.tab);
   const [orderID] = useState(route.params?.itemId);

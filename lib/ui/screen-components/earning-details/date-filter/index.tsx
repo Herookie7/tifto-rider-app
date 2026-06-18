@@ -137,14 +137,18 @@ export default function EarningDetailsDateFilter({
         <View style={{ backgroundColor: appTheme.themeBackground }}>
           <Calendar
             enableSwipeMonths={true}
-            initalDate={""}
+            initialDate={""}
             style={{
               backgroundColor: appTheme.themeBackground,
-              color: appTheme.mainTextColor,
             }}
             headerStyle={{
               backgroundColor: appTheme.themeBackground,
-              color: appTheme.mainTextColor,
+            }}
+            theme={{
+              calendarBackground: appTheme.themeBackground,
+              monthTextColor: appTheme.mainTextColor,
+              dayTextColor: appTheme.mainTextColor,
+              textDisabledColor: appTheme.fontSecondColor,
             }}
             onDayPress={(day: DateData) => handleDayPress(day)}
             markedDates={{

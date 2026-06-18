@@ -20,6 +20,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@0no-co/graphql.web": "^1.2.0",
     "@apollo/client": "^3.12.7",
     "@cloudinary/url-gen": "^1.21.0",
     "@expo/config-plugins": "~10.0.0",
@@ -33,7 +34,9 @@
     "@react-navigation/drawer": "^7.1.1",
     "@react-navigation/native": "^7.0.14",
     "@shopify/flash-list": "1.7.6",
+    "@urql/core": "^6.0.1",
     "expo": "^53.0.22",
+    "expo-application": "~6.1.5",
     "expo-audio": "^0.4.6",
     "expo-av": "~15.1.6",
     "expo-blur": "~14.1.5",

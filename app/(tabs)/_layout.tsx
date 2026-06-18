@@ -40,7 +40,6 @@ const RootLayout = () => {
         tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarSafeAreaInsets: { bottom: Math.max(insets.bottom, 8) },
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",

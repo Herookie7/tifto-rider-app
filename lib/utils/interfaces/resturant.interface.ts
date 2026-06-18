@@ -1,4 +1,4 @@
-import { TPolygonPoints } from "../types/restaurant";
+export type TPolygonPoints = [number, number];
 
 export interface IRestaurantProfile {
   _id: string;

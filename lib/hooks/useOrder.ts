@@ -16,14 +16,14 @@ const useOrder = (order: IOrder) => {
   const navigation = useNavigation();
   const secondsRef = useRef(0);
   const minutesRef = useRef(2);
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [time, setTime] = useState("00:00");
 
   useEffect(() => {
         // Clear any existing timer first to prevent multiple timers
         if (timerRef.current) {
           clearInterval(timerRef.current);
-          timerRef.current = undefined;
+          timerRef.current = null;
         }
 
    if(order.acceptedAt){
@@ -42,7 +42,7 @@ const useOrder = (order: IOrder) => {
           } else {
             if (timerRef.current) {
               clearInterval(timerRef.current);
-              timerRef.current = undefined;
+              timerRef.current = null;
             }
             refetchAssigned();
           }
@@ -55,7 +55,11 @@ const useOrder = (order: IOrder) => {
       }, 1000);
     }
    }
-    return () => timerRef.current && clearInterval(timerRef.current);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, []);
 
   useSubscription(SUBSCRIPTION_ORDERS, {
@@ -71,7 +75,7 @@ const useOrder = (order: IOrder) => {
     }
   );
 
-  async function onCompleted(result) {
+  async function onCompleted(result: any) {
     if (result.assignOrder) {
       FlashMessageComponent({ message: "Order has been assigned to you." });
     }
